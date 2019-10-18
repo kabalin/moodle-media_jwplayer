@@ -583,6 +583,7 @@ class media_jwplayer_plugin extends core_media_player {
         $playersetup = new stdClass();
         $playersetup->playerid = $playerid;
         $playersetup->setupdata = $playersetupdata;
+        $playersetup->events = $this->get_enabled_events();
 
         // Add download button if required and supported.
         if (get_config('media_jwplayer', 'downloadbutton') && !$isstream) {
@@ -592,12 +593,8 @@ class media_jwplayer_plugin extends core_media_player {
             ];
         }
 
-        // Pass the page context variables for logging
-        $playersetup->logcontext = $PAGE->context->id;
-        $playersetup->logevents = $this->get_supported_events();
-
         // Set up the player.
-        $PAGE->requires->js_call_amd('media_jwplayer/jwplayer', 'setupPlayer', [$playersetup]);
+        $PAGE->requires->js_call_amd('media_jwplayer/jwplayer', 'setupPlayer', [$playersetup, $PAGE->context->id]);
         $playerdiv = html_writer::div(self::LINKPLACEHOLDER, '', ['id' => $playerid]);
         return html_writer::div($playerdiv, 'mediaplugin mediaplugin_jwplayer d-block', $options['globalattributes']);
     }
@@ -616,7 +613,7 @@ class media_jwplayer_plugin extends core_media_player {
      *
      * @return array Array of strings
      */
-    public function get_supported_events() {
+    private function get_enabled_events() {
         return explode(',', get_config('media_jwplayer', 'enabledevents'));
     }
 
@@ -633,25 +630,18 @@ class media_jwplayer_plugin extends core_media_player {
     }
 
     /**
-     * Generates the list of supported events that can be logged.
+     * Generates the list of supported events that can be traced and logged.
      *
      * @return array Array of strings
      */
     public static function list_supported_events() {
         $events = [
-            'playAttempt',
-            'play',
-            'buffer',
-            'pause',
-            'idle',
-            'complete',
-            'error',
-            'setupError',
-            'seek',
-            'visualQuality',
-            'levelsChanged',
-            'audioTrackChanged',
-            'captionsChanged',
+            'started',
+            'paused',
+            'seeked',
+            'resumed',
+            'completed',
+            'failed',
         ];
         return $events;
     }

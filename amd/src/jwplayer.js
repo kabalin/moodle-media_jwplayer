@@ -21,112 +21,140 @@
  * @copyright  2017 Ruslan Kabalin, Lancaster University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jwplayer', 'jquery', 'core/config', 'core/yui', 'core/log', 'module'], function(jwplayer, $, mdlconfig, Y, log, module) {
+define(['jwplayer', 'jquery', 'core/ajax', 'core/log', 'module'], function(jwplayer, $, ajax, log, module) {
+    var player = {
+        /** @var {Number} context ID of the page. */
+        context: null,
 
-    // Private functions and variables.
-    /** @var {int} logcontext Moodle page context id. */
-    var logcontext = null;
+        /** @var {Object} event map. */
+        eventMap: {
+            started:   'firstFrame',
+            paused:    'pause',
+            seeked:    'seek',
+            resumed:   'play',
+            completed: 'complete',
+            failed:    'error'
+        },
 
-    /**
-     * Event logging. Called when player event is triggered.
-     *
-     * @method logevent
-     * @private
-     * @param {Object[]} event JW Player event.
-     */
-    var logevent = function(event) {
-        var playerinstance = this;
-        var config = {
-            method: 'POST',
-            data:  {
-                'sesskey' : mdlconfig.sesskey,
-                'event': JSON.stringify(event),
-                'id': logcontext,
-                'title': playerinstance.getPlaylistItem().title,
-                'file': playerinstance.getPlaylistItem().file,
-                'position': playerinstance.getPosition(),
-                'bitrate': playerinstance.getCurrentQuality().bitrate,
-            },
-            on: {
-                failure: function(o) {
-                    log.error(o);
-                }
-            }
-        };
+        /** @var {Object} event map reversed. */
+        flipEventMap: {},
 
-        if (event.type == "play") {
-            // For play events wait a short time before setting position so it picks up new position after seeks.
-            setTimeout(function(){config.data.position = playerinstance.getPosition();}, 10);
-        }
-
-        if (event.type == "levelsChanged") {
-            // Pass information of quality levels for quality level events.
-            config.data.qualitylevel = JSON.stringify(playerinstance.getQualityLevels());
-        }
-        if (event.type == "audioTrackChanged") {
-            // Pass information of audio tracks for audio track events.
-            config.data.audiotracks = JSON.stringify(playerinstance.getAudioTracks());
-        }
-        if (event.type == "captionsChanged") {
-            // Pass information of captions for caption events.
-            config.data.captions = JSON.stringify(playerinstance.getCaptionsList());
-        }
-
-        // log.debug(config.data);
-        Y.io(mdlconfig.wwwroot + '/media/player/jwplayer/eventlogger.php', config);
-    };
-
-    /**
-     * Error logging. Called when player error event is triggered.
-     *
-     * @method logevent
-     * @private
-     * @param {Object[]} event JW Player event.
-     */
-    var logerror = function(event) {
-        if (this.getPlaylistItem()) {
-            log.error(this.getPlaylistItem().title + ' ' + event.type + ': ' + event.message);
-        } else {
-            log.error(event.message);
-        }
-    };
-
-    return {
         /**
-         * Setup player instance.
+         * Initialise the player instance.
          *
-         * @method init
-         * @param {Object[]} playersetup JW Player setup parameters.
-         * @return {void}
+         * @method  init
+         * @param   {Object}    playerSetup JW Player setup parameters.
+         * @param   {Number}    context     The context of the current page.
          */
-        setupPlayer: function (playersetup) {
+        init: function (playerSetup, context) {
+            player.context = context;
+
             if (module.config().licensekey) {
                 jwplayer.key = module.config().licensekey;
             }
 
-            logcontext = playersetup.logcontext;
-            if (!$('#' + playersetup.playerid).length) {
+            if (!$('#' + playerSetup.playerid).length) {
+                player.logError({
+                    type: 'setupError',
+                    message: 'The target element for player setup (#' + playerSetup.playerid + ') is missing.'
+                });
                 return;
             }
-            var playerinstance = jwplayer(playersetup.playerid);
-            playerinstance.setup(playersetup.setupdata);
+
+            let playerinstance = jwplayer(playerSetup.playerid);
+            playerinstance.setup(playerSetup.setupdata);
 
             // Add download button if required.
-            if (typeof(playersetup.downloadbtn) !== 'undefined') {
-                playerinstance.addButton(playersetup.downloadbtn.img, playersetup.downloadbtn.tttext, function() {
+            if (typeof(playerSetup.downloadbtn) !== 'undefined') {
+                playerinstance.addButton(playerSetup.downloadbtn.img, playerSetup.downloadbtn.tttext, function() {
                     // Grab the file that's currently playing.
                     window.open(playerinstance.getPlaylistItem().file + '?forcedownload=true');
                 }, "download");
             }
 
-            // Track errors and log them in browser console.
-            playerinstance.on('setupError', logerror);
-            playerinstance.on('error', logerror);
+            // Track errors and log them.
+            playerinstance.on('setupError', player.logError);
+            playerinstance.on('error', player.logError);
 
             // Track required events and log them in Moodle.
-            playersetup.logevents.forEach(function (eventname) {
-                playerinstance.on(eventname, logevent);
+            playerSetup.events.forEach(function (eventName) {
+                if (player.getEventName(eventName) !== 'undefined') {
+                    player.flipEventMap[player.getEventName(eventName)] = eventName;
+                    playerinstance.on(player.getEventName(eventName), player.logEvent);
+                }
             });
+        },
+
+        /**
+         * Event mapping helper.
+         *
+         * @method getEventName
+         * @param  {String} mdlEventName media_jwplayer plugin event.
+         * @return {String}
+         */
+        getEventName: function(mdlEventName) {
+            return player.eventMap[mdlEventName];
+        },
+
+        /**
+         * Event logging.
+         *
+         * @method logEvent
+         * @param {Object} event JW Player event.
+         */
+        logEvent: function(event) {
+            let args = {
+                context:    player.context,
+                event:      player.flipEventMap[event.type],
+                title:      this.getPlaylistItem().file,
+                position:   parseInt(this.getPosition())
+            };
+
+            if (typeof this.getPlaylistItem().title !== 'undefined') {
+                // If title is defined, use it.
+                args.title = this.getPlaylistItem().title;
+            }
+
+            if (event.type === 'seek') {
+                // Offset is only valid for 'seek' event.
+                args.offset = parseInt(event.offset);
+            }
+
+            if (event.type !== 'error') {
+                $.when(
+                    ajax.call([
+                        {
+                            methodname: 'media_jwplayer_playback_event',
+                            args: args
+                        }
+                    ])[0]
+                ).fail(log.error);
+            }
+        },
+
+        /**
+         * Error logging.
+         *
+         * @method logError
+         * @param  {Object} event JW Player event.
+         */
+        logError: function(event) {
+            if (event.type === 'error') {
+                log.error('media_jwplayer error: ' + event.message);
+            } else if (event.type === 'setupError'){
+                log.error('media_jwplayer setup error: ' + event.message);
+            }
         }
+    };
+
+    return /** @alias module:media_jwplayer/jwplayer */ {
+        /**
+         * Setup player instance.
+         *
+         * @method  setupPlayer
+         * @param   {Object}    playerSetup JW Player setup parameters.
+         * @param   {Number}    context     The context of the current page.
+         */
+        setupPlayer: player.init
     };
 });

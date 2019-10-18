@@ -58,6 +58,12 @@ function xmldb_media_jwplayer_upgrade($oldversion) {
 
         upgrade_plugin_savepoint(true, 2020101200, 'media', 'jwplayer');
     }
-    
+
+    if ($oldversion < 2020101801) {
+        // Clear settings that needs to be highlighted after upgrade and configured again.
+        unset_config('enabledevents', 'media_jwplayer');
+        upgrade_plugin_savepoint(true, 2020101801, 'media', 'jwplayer');
+    }
+
     return true;
 }

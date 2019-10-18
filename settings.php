@@ -73,7 +73,7 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configmultiselect('media_jwplayer/enabledevents',
         get_string('enabledevents', 'media_jwplayer'),
         get_string('enabledeventsdesc', 'media_jwplayer'),
-        ['play', 'pause', 'complete'], $supportedeventsmenu));
+        ['started', 'completed'], $supportedeventsmenu));
 
     // Appearance related settings.
     $settings->add(new admin_setting_heading('appearanceconfig',

@@ -15,45 +15,71 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The JWPlayer media_playback_failed event.
+ * The JWPlayer playback_completed event (corresponds to 'complete' event).
+ *
+ * This event signals when playback is completed.
  *
  * @package    media_jwplayer
  * @copyright  2017 Owen Barritt, Wine & Spirit Education Trust
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 namespace media_jwplayer\event;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Playback failed event handler.
+ * Playback completed.
  *
  * @package    media_jwplayer
  * @copyright  2017 Owen Barritt, Wine & Spirit Education Trust
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
+ * @property-read array $other {
+ *      Extra information about the event.
+ *
+ *      - string    title:      The title of the video being played.
  */
-class media_playback_failed extends \core\event\base {
+class playback_completed extends \core\event\base {
+
+    /**
+     * Init method.
+     */
     protected function init() {
-        $this->data['crud'] = 'c'; // c(reate), r(ead), u(pdate), d(elete)
+        $this->data['crud'] = 'r';
         $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
     }
 
-    public static function get_name() {
-        return get_string('eventmedia_playback_failed', 'media_jwplayer');
+    /**
+     * Returns localised general event name.
+     *
+     * @return string
+     */
+    public static function get_name(): string {
+        return get_string('eventplaybackcompleted', 'media_jwplayer');
     }
 
-    public function get_description() {
-        $logstring = "The user with id {$this->userid} has received an error viewing the video {$this->other['file']}";
+    /**
+     * Custom validation.
+     *
+     * @throws \coding_exception
+     * @return void
+     */
+    protected function validate_data() {
+        parent::validate_data();
 
-        if (isset($this->other['position']) && $this->other['position'] != 'undefined') {
-            $logstring .= " at {$this->other['position']}s";
+        if (!isset($this->other['title'])) {
+            throw new \coding_exception('The \'title\' value must be set in other.');
         }
-        if (isset($this->other['bitrate']) && $this->other['bitrate'] != 'undefined') {
-            $logstring .= " at a bitrate of {$this->other['bitrate']}";
-        }
-        if (isset($this->other['errmessage'])) {
-            $logstring .= " due to {$this->other['errmessage']}.";
-        }
+    }
 
+    /**
+     * Returns non-localised event description with id's for admin use only.
+     *
+     * @return string
+     */
+    public function get_description(): string {
+        $logstring = "The user with id {$this->userid} has completed viewing the video '{$this->other['title']}'";
         return $logstring;
     }
 }

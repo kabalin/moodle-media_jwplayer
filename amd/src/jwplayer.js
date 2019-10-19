@@ -26,7 +26,7 @@ define(['jwplayer', 'jquery', 'core/ajax', 'core/log', 'module'], function(jwpla
         /** @var {Number} context ID of the page. */
         context: null,
 
-        /** @var {Object} event map. */
+        /** @var {Object} events map. */
         eventMap: {
             started:   'firstFrame',
             paused:    'pause',
@@ -36,15 +36,15 @@ define(['jwplayer', 'jquery', 'core/ajax', 'core/log', 'module'], function(jwpla
             failed:    'error'
         },
 
-        /** @var {Object} event map reversed. */
-        flipEventMap: {},
+        /** @var {Object} requested events map. */
+        reqEventMap: {},
 
         /**
          * Initialise the player instance.
          *
          * @method  init
-         * @param   {Object}    playerSetup JW Player setup parameters.
-         * @param   {Number}    context     The context of the current page.
+         * @param   {Object} playerSetup JW Player setup parameters.
+         * @param   {Number} context     The context of the current page.
          */
         init: function (playerSetup, context) {
             player.context = context;
@@ -62,6 +62,7 @@ define(['jwplayer', 'jquery', 'core/ajax', 'core/log', 'module'], function(jwpla
             }
 
             let playerinstance = jwplayer(playerSetup.playerid);
+            // Setup player.
             playerinstance.setup(playerSetup.setupdata);
 
             // Add download button if required.
@@ -72,17 +73,21 @@ define(['jwplayer', 'jquery', 'core/ajax', 'core/log', 'module'], function(jwpla
                 }, "download");
             }
 
-            // Track errors and log them.
-            playerinstance.on('setupError', player.logError);
-            playerinstance.on('error', player.logError);
-
             // Track required events and log them in Moodle.
             playerSetup.events.forEach(function (eventName) {
-                if (player.getEventName(eventName) !== 'undefined') {
-                    player.flipEventMap[player.getEventName(eventName)] = eventName;
+                if (typeof player.getEventName(eventName) === 'undefined') {
+                    throw new Error("Event tracking for '" + eventName + "' has no JWPlayer API event mapping.");
+                }
+                player.reqEventMap[player.getEventName(eventName)] = eventName;
+                if (player.getEventName(eventName) !== 'error') {
+                    // Attach event processing callbacks.
                     playerinstance.on(player.getEventName(eventName), player.logEvent);
                 }
             });
+
+            // Track errors and log them.
+            playerinstance.on('setupError', player.logError);
+            playerinstance.on('error', player.logError);
         },
 
         /**
@@ -100,12 +105,12 @@ define(['jwplayer', 'jquery', 'core/ajax', 'core/log', 'module'], function(jwpla
          * Event logging.
          *
          * @method logEvent
-         * @param {Object} event JW Player event.
+         * @param  {Object} event JW Player event.
          */
         logEvent: function(event) {
             let args = {
                 context:    player.context,
-                event:      player.flipEventMap[event.type],
+                event:      player.reqEventMap[event.type],
                 title:      this.getPlaylistItem().file,
                 position:   parseInt(this.getPosition())
             };
@@ -120,16 +125,15 @@ define(['jwplayer', 'jquery', 'core/ajax', 'core/log', 'module'], function(jwpla
                 args.offset = parseInt(event.offset);
             }
 
-            if (event.type !== 'error') {
-                $.when(
-                    ajax.call([
-                        {
-                            methodname: 'media_jwplayer_playback_event',
-                            args: args
-                        }
-                    ])[0]
-                ).fail(log.error);
-            }
+            // Perform webservice call.
+            $.when(
+                ajax.call([
+                    {
+                        methodname: 'media_jwplayer_playback_event',
+                        args: args
+                    }
+                ])[0]
+            ).fail(log.error);
         },
 
         /**
@@ -139,10 +143,38 @@ define(['jwplayer', 'jquery', 'core/ajax', 'core/log', 'module'], function(jwpla
          * @param  {Object} event JW Player event.
          */
         logError: function(event) {
-            if (event.type === 'error') {
-                log.error('media_jwplayer error: ' + event.message);
-            } else if (event.type === 'setupError'){
+            if (event.type === 'setupError') {
+                // For setup error just log to console.
                 log.error('media_jwplayer setup error: ' + event.message);
+                return;
+            }
+
+            log.error('media_jwplayer error: ' + event.message);
+
+            if (typeof player.reqEventMap.error !== 'undefined') {
+                // Event needs to be relayed.
+                let args = {
+                    context:    player.context,
+                    title:      this.getPlaylistItem().file,
+                    position:   parseInt(this.getPosition()),
+                    code:       event.code,
+                    message:    event.message
+                };
+
+                if (typeof this.getPlaylistItem().title !== 'undefined') {
+                    // If title is defined, use it.
+                    args.title = this.getPlaylistItem().title;
+                }
+
+                // Perform webservice call.
+                $.when(
+                    ajax.call([
+                        {
+                            methodname: 'media_jwplayer_playback_failed',
+                            args: args
+                        }
+                    ])[0]
+                ).fail(log.error);
             }
         }
     };

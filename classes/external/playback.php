@@ -45,7 +45,7 @@ class playback extends external_api {
      * Relay playback event.
      *
      * @param   int     $context    The Context ID of the current page.
-     * @param   event   $event      The name of event.
+     * @param   string  $event      The name of event.
      * @param   string  $title      The title of the media.
      * @param   int     $position   The position in seconds in the file on which event occured (optional).
      * @param   int     $offset     The position in seconds in the file where seek is requested (optional).
@@ -96,4 +96,54 @@ class playback extends external_api {
         return new external_single_structure([]);
     }
 
+    /**
+     * Playback failure.
+     *
+     * @param   int     $context    The Context ID of the current page.
+     * @param   string  $title      The title of the media.
+     * @param   int     $position   The position in seconds in the file on which event occured (optional).
+     * @param   string  $code       The error code.
+     * @param   string  $message    The error message.
+     * @return  array               As described in playback_failed_returns
+     */
+    public static function playback_failed($context, $title, $position, $code, $message) {
+        $context = \context_helper::instance_by_id($context);
+        self::validate_context($context);
+
+        \media_jwplayer\event\playback_failed::create([
+            'contextid' => $context->id,
+            'other'     => [
+                'title'    => $title,
+                'position' => $position,
+                'code'     => $code,
+                'message'  => $message,
+            ],
+        ])->trigger();
+
+        return [];
+    }
+
+    /**
+     * The parameters for playback_failed.
+     *
+     * @return external_function_parameters
+     */
+    public static function playback_failed_parameters() {
+        return new external_function_parameters([
+            'context'   => new external_value(PARAM_INT,  'Context ID'),
+            'title'     => new external_value(PARAM_TEXT, 'Media title'),
+            'position'  => new external_value(PARAM_INT,  'Position in the file (sec)', VALUE_DEFAULT, 0),
+            'code'      => new external_value(PARAM_TEXT, 'Error code'),
+            'message'   => new external_value(PARAM_TEXT, 'Error message'),
+        ]);
+    }
+
+    /**
+     * The return configuration for playback_failed.
+     *
+     * @return external_single_structure
+     */
+    public static function playback_failed_returns() {
+        return new external_single_structure([]);
+    }
 }

@@ -360,14 +360,15 @@ class media_jwplayer_plugin extends core_media_player {
      *
      * @return array Mapping of tag attribute => player setup option.
      */
-    private static function get_video_tag_options_mapping() {
-        return array(
+    private static function get_video_tag_options_mapping(): array {
+        return [
             'autoplay' => 'autostart',
             'controls' => 'controls',
             'loop'     => 'repeat',
             'muted'    => 'mute',
             'poster'   => 'image',
-        );
+            'preload'  => 'preload',
+        ];
     }
 
     /**
@@ -377,23 +378,25 @@ class media_jwplayer_plugin extends core_media_player {
      *
      * @return array Mapping of tag attribute => player setup option.
      */
-    private static function get_audio_tag_options_mapping() {
-        return array(
+    private static function get_audio_tag_options_mapping(): array {
+        return [
             'autoplay' => 'autostart',
             'controls' => 'controls',
             'loop'     => 'repeat',
             'muted'    => 'mute',
-        );
+            'preload'  => 'preload',
+        ];
     }
+
     /**
      * Returns the list of valid global attributes.
      *
      * @return array Global attributes.
      */
-    private static function get_global_attributes() {
+    private static function get_global_attributes(): array {
         // List of valid global attributes.
         // https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
-        return array(
+        return [
             'accesskey',
             'autocapitalize',
             'class',
@@ -411,13 +414,14 @@ class media_jwplayer_plugin extends core_media_player {
             'itemscope',
             'itemtype',
             'lang',
+            'part',
             'slot',
             'spellcheck',
             'style',
             'tabindex',
             'title',
             'translate',
-        );
+        ];
     }
 
     /**
@@ -428,15 +432,6 @@ class media_jwplayer_plugin extends core_media_player {
      * @param int $width Optional width; 0 to use default
      * @param int $height Optional height; 0 to use default
      * @param array $options Player options array
-     *                       image
-     *                           use 'image' key with a moodle_url to an image as poster image
-     *                           displayed before playback starts.
-     *                       subtitles
-     *                           use 'subtitles' key with an array of subtitle track files
-     *                           in vtt or srt format indexed by label name.
-     *                           Example: $options['subtitles']['English'] = http://example.com/english.vtt
-     *                       globalattributes
-     *                           Other no-player-specific attributes provided in the source (e.g. class, title).
      * @return string HTML code for embed
      */
     private function embed_jwplayer($urls, $name, $width, $height, $options) {

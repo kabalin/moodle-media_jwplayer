@@ -25,8 +25,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['appearanceconfig'] = 'Appearance';
-$string['customskincss'] = 'Custom CSS skin name';
-$string['customskincssdesc'] = 'Use a custom CSS skin.  Styles should be added to the site css as described in <a href="http://support.jwplayer.com/customer/portal/articles/1412123-building-jw-player-skins">JW Player website</a>.';
+$string['customskinname'] = 'Custom skin name';
+$string['customskinnamedesc'] = 'The name of your custom CSS skin to use for styling the player. The skin name will be appended to the <tt>.jw-skin-</tt> prefix and used in player element, this allows user to override player style by defining the class in Moodle theme as described in <a href="https://developer.jwplayer.com/jwplayer/docs/jw8-branding">Branding documentation</a>.';
 $string['defaultposter'] = 'Default poster';
 $string['defaultposterdesc'] = 'Default poster image to use with videos.';
 $string['displaystyle'] = 'Display Style';
@@ -72,6 +72,4 @@ $string['playbackrates'] = 'Playback rate button';
 $string['playbackratesdesc'] = 'Display a button in the controlbar to adjust playback speed. Select speeds that need to be available for users. To disable control, select only \'1x\' or leave no options selected.';
 $string['pluginname'] = 'JW Player';
 $string['privacy:metadata'] = 'JWPlayer plugin does not store any personal data.';
-$string['standardskin'] = 'standard';
-$string['useplayerskin'] = 'Use player skin';
 $string['videodownloadbtntttext'] = 'Download Video';

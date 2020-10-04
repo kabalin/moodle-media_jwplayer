@@ -35,6 +35,7 @@ function xmldb_media_jwplayer_upgrade($oldversion) {
     if ($oldversion < 2020100400) {
         // Remove deprecated configuration.
         unset_config('supportrtmp', 'media_jwplayer');
+        unset_config('customskincss', 'media_jwplayer');
 
         upgrade_plugin_savepoint(true, 2020100400, 'media', 'jwplayer');
     }

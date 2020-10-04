@@ -574,10 +574,8 @@ class media_jwplayer_plugin extends core_media_player {
         }
 
         // Load skin.
-        if ($customskincss = get_config('media_jwplayer', 'customskincss')) {
-            $playersetupdata['skin'] = $customskincss;
-        } else if ($skin = get_config('media_jwplayer', 'skin')) {
-            $playersetupdata['skin'] = $skin;
+        if ($customskinname = get_config('media_jwplayer', 'customskinname')) {
+            $playersetupdata['skin'] = ['name' => $customskinname];
         }
 
         // Playback rate.

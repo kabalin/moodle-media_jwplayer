@@ -99,18 +99,11 @@ if ($ADMIN->fulltree) {
             get_string('displaystyledesc', 'media_jwplayer'),
             'fixed', $displaystylechoice));
 
-    // Skins.
-    $skins = array('beelden', 'bekle', 'five', 'glow', 'roundster', 'six', 'stormtrooper', 'vapor');
-    $skinoptions = array('' => get_string('standardskin', 'media_jwplayer'));
-    $skinoptions = array_merge($skinoptions, array_combine($skins, $skins));
-    $settings->add(new admin_setting_configselect('media_jwplayer/skin',
-            get_string('useplayerskin', 'media_jwplayer'), '', '', $skinoptions));
-
-    // Custom skin.
-    $settings->add(new admin_setting_configtext('media_jwplayer/customskincss',
-            get_string('customskincss', 'media_jwplayer'),
-            get_string('customskincssdesc', 'media_jwplayer'),
-            ''));
+    // Custom skin name.
+    $settings->add(new admin_setting_configtext('media_jwplayer/customskinname',
+        get_string('customskinname', 'media_jwplayer'),
+        get_string('customskinnamedesc', 'media_jwplayer'),
+        '', PARAM_ALPHANUMEXT));
 
     // Allow empty title.
     $settings->add(new admin_setting_configcheckbox('media_jwplayer/emptytitle',

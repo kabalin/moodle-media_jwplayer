@@ -49,18 +49,10 @@ if ($ADMIN->fulltree) {
     // Enabled extensions.
     $supportedextensions = $jwplayer->list_supported_extensions();
     $enabledextensionsmenu = array_combine($supportedextensions, $supportedextensions);
-    array_splice($supportedextensions, array_search('mpd', $supportedextensions), 1);  // disable mpeg-dash as it requires premium licence or higher.
-    array_splice($supportedextensions, array_search('m3u8', $supportedextensions), 1);  // disable HLS by default as it needs a Premium licence
     $settings->add(new admin_setting_configmultiselect('media_jwplayer/enabledextensions',
             get_string('enabledextensions', 'media_jwplayer'),
             get_string('enabledextensionsdesc', 'media_jwplayer'),
             $supportedextensions, $enabledextensionsmenu));
-
-    // RTMP support.
-    $settings->add(new admin_setting_configcheckbox('media_jwplayer/supportrtmp',
-            get_string('supportrtmp', 'media_jwplayer'),
-            get_string('supportrtmpdesc', 'media_jwplayer'),
-            0));
 
     // Enabled events to log.
     $supportedevents = $jwplayer->list_supported_events();

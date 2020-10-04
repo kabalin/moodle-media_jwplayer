@@ -73,7 +73,5 @@ $string['playbackratesdesc'] = 'Display a button in the controlbar to adjust pla
 $string['pluginname'] = 'JW Player';
 $string['privacy:metadata'] = 'JWPlayer plugin does not store any personal data.';
 $string['standardskin'] = 'standard';
-$string['supportrtmp'] = 'RTMP streams';
-$string['supportrtmpdesc'] = 'If enabled, links that start with rtmp:// will be handled by the plugin, irrespective of whether its extension is enabled in the supported extensions setting.';
 $string['useplayerskin'] = 'Use player skin';
 $string['videodownloadbtntttext'] = 'Download Video';

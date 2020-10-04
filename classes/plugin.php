@@ -91,11 +91,6 @@ class media_jwplayer_plugin extends core_media_player {
             // Check URLs if they can be used for html5. Even if we had html5 video source,
             // we go through links anyway to add mimetype.
             foreach ($urls as $url) {
-                if ($url->get_scheme() === 'rtmp') {
-                    // RTMP needs flash, skipping.
-                    continue;
-                }
-
                 // Get extension and mimetype.
                 $ext = core_media_manager::instance()->get_extension($url);
                 $mimetype = core_media_manager::instance()->get_mimetype($url);
@@ -463,19 +458,7 @@ class media_jwplayer_plugin extends core_media_player {
             if ($ext === 'mov') {
                 $source['type'] = 'mp4';
             }
-
-            if ($ext === 'mpd') {
-                // Dash variable needs to be set if we have a dash stream_bucket_append
-                $playersetupdata['dash'] = true;
-                $streams[] = $source;
-            } else if ($url->get_scheme() === 'rtmp' || $ext === 'm3u8' || $ext === 'smil') {
-                // For RTMP, HLS and Dynamic RTMP we set rendering mode to Flash to
-                // ensure streams play is possible even when mp4 fallbacks are given.
-                $playersetupdata['primary'] = 'flash';
-                $streams[] = $source;
-            } else {
-                $sources[] = $source;
-            }
+            $sources[] = $source;
         }
 
         // Make sure that stream URLs are at the start of the list and set up playlist.
@@ -576,7 +559,7 @@ class media_jwplayer_plugin extends core_media_player {
             }
         }
 
-        // Set additional player options: autostart, mute, controls, repeat, hlslabels, androidhls, primary.
+        // Set additional player options: autostart, mute, controls, repeat.
         if (isset($options['autostart'])) {
             $playersetupdata['autostart'] = $options['autostart'];
         }
@@ -588,16 +571,6 @@ class media_jwplayer_plugin extends core_media_player {
         }
         if (isset($options['repeat'])) {
             $playersetupdata['repeat'] = $options['repeat'];
-        }
-        if (isset($options['hlslabels']) && is_array($options['hlslabels'])) {
-            $playersetupdata['hlslabels'] = $options['hlslabels'];
-        }
-        if (isset($options['androidhls'])) {
-            $playersetupdata['androidhls'] = $options['androidhls'];
-        }
-        if (isset($options['primary'])) {
-            // if primary is set in $options then this will override all defaults including those for streams set above.
-            $playersetupdata['primary'] = $options['primary'];
         }
 
         // Load skin.
@@ -688,21 +661,6 @@ class media_jwplayer_plugin extends core_media_player {
     }
 
     /**
-     * Lists keywords that must be included in a url that can be embedded with
-     * this media player.
-     *
-     * @return array Array of keywords to add to the embeddable markers list
-     */
-    public function get_embeddable_markers() {
-        $markers = parent::get_embeddable_markers();
-        // Add RTMP support if enabled.
-        if (get_config('media_jwplayer', 'supportrtmp')) {
-            $markers[] = 'rtmp://';
-        }
-        return $markers;
-    }
-
-    /**
      * Generates the list of file extensions supported by this media player.
      *
      * @return array Array of strings (extension not including dot e.g. 'mp3')
@@ -736,30 +694,6 @@ class media_jwplayer_plugin extends core_media_player {
             'captionsChanged',
         );
         return $events;
-    }
-
-    /**
-     * Given a list of URLs, returns a reduced array containing only those URLs
-     * which are supported by this player. (Empty if none.)
-     * @param array $urls Array of moodle_url
-     * @param array $options Options (same as will be passed to embed)
-     * @return array Array of supported moodle_url
-     */
-    public function list_supported_urls(array $urls, array $options = array()) {
-        $extensions = $this->get_supported_extensions();
-        $mediamanager = core_media_manager::instance();
-        $result = array();
-        foreach ($urls as $url) {
-            // If RTMP support is disabled, skip the RTMP URL.
-            if (!get_config('media_jwplayer', 'supportrtmp') && ($url->get_scheme() === 'rtmp')) {
-                continue;
-            }
-            if (in_array($mediamanager->get_extension($url), $extensions) || ($url->get_scheme() === 'rtmp')) {
-                // URL is matching one of enabled extensions or it is RTMP URL.
-                $result[] = $url;
-            }
-        }
-        return $result;
     }
 
     /**
@@ -832,20 +766,6 @@ class media_jwplayer_plugin extends core_media_player {
         $licensejs = 'require.config({ config: {\'media_jwplayer/jwplayer\': { licensekey: \'' . $licensekey . '\'}}})';
         $page->requires->js_amd_inline($licensejs);
     }
-
-    /**
-     * Returns human-readable string of supported file/link types for the "Manage media players" page
-     * @param array $usedextensions extensions that should NOT be highlighted
-     * @return string
-     */
-    public function supports($usedextensions = []) {
-        $supports = parent::supports($usedextensions);
-        if (get_config('media_jwplayer', 'supportrtmp')) {
-            $supports .= ($supports ? '<br>' : '') . get_string('supportrtmp', 'media_jwplayer');
-        }
-        return $supports;
-    }
-
 
     /**
      * Check if embedding is requested by webservice call from mobile app.

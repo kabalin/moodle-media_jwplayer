@@ -129,8 +129,7 @@ make player aligned to the right.
 HTML attributes in the player link that start with _data-jwplayer-_ prefix,
 will be used as player configuration options. The possible options are:
 
-_aspectratio, autostart, controls, height, mute, primary, repeat, width,
-androidhls, hlslabels, description, mediaid, subtitles_
+_aspectratio, autostart, controls, height, mute, repeat, width, description, mediaid, subtitles_
 
 For full description of each option, please refer to [configuration
 reference](https://developer.jwplayer.com/jw-player/docs/developer-guide/customization/configuration-reference/)

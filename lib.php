@@ -24,13 +24,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-// Current version of cloud-hosted JW Player.
-if (!defined('MEDIA_JWPLAYER_CLOUD_VERSION')) {
-    // This is the only place where version needs to be changed in case of new
-    // release avialability.
-    define('MEDIA_JWPLAYER_CLOUD_VERSION', '7.12.13');
-}
-
 if (!defined('MEDIA_JWPLAYER_VIDEO_WIDTH_RESPONSIVE')) {
     // Default video width if no width is specified.
     // May be defined in config.php if required.

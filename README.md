@@ -153,18 +153,10 @@ data-jwplayer-description="some description">test subtitles</a>`
 The player default width is defined in Manage media players page. If
 responsive mode is enabled in plugin configuration, player will expand. 
 
-### CDN JW Player version
+### JW Player version
 
-While in self-hosted mode, choosing a different release is a matter of
-downloading desired JW7 release and replacing files in ./media/player/jwplayer/jwplayer,
-cloud-hosted version is using a constant to determine the version to use in
-JW Player CDN. Plugin is using the most recent stable version of JW Player
-[available](https://developer.jwplayer.com/jw-player/docs/developer-guide/release_notes/release_notes_7/)
-at release time, however if different version is required, it can be
-specified using `MEDIA_JWPLAYER_CLOUD_VERSION` constant defined in Moodle
-`config.php`, e.g. `define('MEDIA_JWPLAYER_CLOUD_VERSION', '7.12.1');` will
-make plugin using player version 7.12.1.
+In cloud-hosted library mode, choosing specific player version is not possible, the latest is always used.
+However, in player configuration on the Dashboard user can choose between Production and Beta release channels.
 
-When changing version, makes sure it exists in CDN by substituting version
-number in the URL and testing its availability in the browser, e.g.
-<https://ssl.p.jwpcdn.com/player/v/7.12.1/jwplayer.js>
+If self-hosted mode is used, choosing a different version is a matter of
+downloading desired JW8 release from "Player Downloads & Keys" page and replacing files in `./media/player/jwplayer/jwplayer` directory.

@@ -60,7 +60,7 @@ class media_jwplayer_hostingmethod_setting extends admin_setting_configselect {
         if ($data === 'self') {
             $hostedjwplayerpath = $CFG->dirroot . '/media/player/jwplayer/jwplayer/jwplayer.js';
             if (!is_readable($hostedjwplayerpath)) {
-                return get_string('errornojwplayerinstalled', 'media_jwplayer');
+                return get_string('errornoselfhostedlibrary', 'media_jwplayer');
             }
         }
         return true;
@@ -79,7 +79,7 @@ class media_jwplayer_license_setting extends admin_setting_configtext {
     /**
      * Validate data.
      *
-     * This ensures that license key is specified for any hosting mode.
+     * This ensures that license key is specified for self-hosting mode.
      *
      * @param string $data
      * @return mixed True on success, else error message.
@@ -90,7 +90,7 @@ class media_jwplayer_license_setting extends admin_setting_configtext {
             return $result;
         }
 
-        if (empty($data)) {
+        if (empty($data) && get_config('media_jwplayer', 'hostingmethod') === 'self') {
             return get_string('errornolicensekey', 'media_jwplayer');
         }
         return true;

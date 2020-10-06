@@ -705,17 +705,12 @@ class media_jwplayer_plugin extends core_media_player {
      *
      * @return bool True if player is enabled
      */
-    public function is_enabled() {
+    private function is_configured() {
         global $CFG;
         $hostingmethod = get_config('media_jwplayer', 'hostingmethod');
-        $licensekey = get_config('media_jwplayer', 'licensekey');
-        if (($hostingmethod === 'cloud') && empty($licensekey)) {
-            // Cloud mode, but no license key.
-            return false;
-        }
-        $hostedjwplayerpath = $CFG->dirroot . '/media/player/jwplayer/jwplayer/jwplayer.js';
-        if (($hostingmethod === 'self') && (!is_readable($hostedjwplayerpath) || empty($licensekey))) {
-            // Self-hosted mode, but no jwplayer files and/or no license.
+        $libraryurl = get_config('media_jwplayer', 'libraryurl');
+        if (($hostingmethod === 'cloud') && empty($libraryurl)) {
+            // Cloud mode, but no cloud hosted library URL.
             return false;
         }
         return true;
@@ -730,34 +725,46 @@ class media_jwplayer_plugin extends core_media_player {
     public function setup($page) {
         global $CFG;
 
-        if ($this->is_mobile_app_ws_request()) {
+        if (self::is_mobile_app_ws_request()) {
             // Nothing to setup here, it is webservice call. Set the flag to fallback
             // using <video> tag later.
             $this->ismobileapp = true;
             return;
         }
 
-        if (!$hostingmethod = get_config('media_jwplayer', 'hostingmethod')) {
-            $hostingmethod = 'cloud';
-        }
+        $hostingmethod = get_config('media_jwplayer', 'hostingmethod');
         if ($hostingmethod === 'cloud') {
-            // Well, this is not really a "cloud" version any more, we are just
-            // using jwplayer libraries hosted on JW Player CDN.
-            $jwplayer = new moodle_url('https://ssl.p.jwpcdn.com/player/v/' . MEDIA_JWPLAYER_CLOUD_VERSION . '/jwplayer');
+            $libraryurl = preg_replace('/\.js$/', '', get_config('media_jwplayer', 'libraryurl'));
+            $jwplayer = new moodle_url($libraryurl);
         } else if ($hostingmethod === 'self') {
-            // For self-hosted option, we are looking for player files presence in
-            // /media/player/jwplayer/jwplayer/ directory.
             $jwplayer = new moodle_url($CFG->httpswwwroot.'/media/player/jwplayer/jwplayer/jwplayer');
+
+            // Set license key.
+            $licensekey = get_config('media_jwplayer', 'licensekey');
+            $licensejs = 'require.config({ config: {\'media_jwplayer/jwplayer\': { licensekey: \'' . $licensekey . '\'}}})';
+            $page->requires->js_amd_inline($licensejs);
         }
-        // We need to define jwplayer, since jwplayer doesn't
-        // define a module for require.js.
+
+        // Define jwplayer module.
         $requirejs = 'require.config({ paths: {\'jwplayer\': \'' . $jwplayer->out() . '\'}})';
         $page->requires->js_amd_inline($requirejs);
+    }
 
-        // Set player license key.
-        $licensekey = get_config('media_jwplayer', 'licensekey');
-        $licensejs = 'require.config({ config: {\'media_jwplayer/jwplayer\': { licensekey: \'' . $licensekey . '\'}}})';
-        $page->requires->js_amd_inline($licensejs);
+    /**
+     * Returns human-readable string of supported file/link types for the "Manage media players" page
+     *
+     * @param array $usedextensions extensions that should NOT be highlighted
+     * @return string
+     */
+    public function supports($usedextensions = []) {
+        $supports = '';
+        if (!$this->is_configured()) {
+            // Configuration is incomplete, display warning.
+            $supports .= html_writer::span(get_string('errornotconfigured', 'media_jwplayer'), 'error') . '<br>';
+        }
+        $supports .= parent::supports($usedextensions);
+
+        return $supports;
     }
 
     /**
@@ -768,7 +775,7 @@ class media_jwplayer_plugin extends core_media_player {
      *
      * @return bool
      */
-    public function is_mobile_app_ws_request(){
+    private static function is_mobile_app_ws_request(): bool {
         global $DB;
         $ismobileapp = false;
         $wstoken = optional_param('wstoken', null, PARAM_ALPHANUM);

@@ -30,21 +30,31 @@ if ($ADMIN->fulltree) {
     require_once(__DIR__ . '/classes/plugin.php');
     $jwplayer = new media_jwplayer_plugin();
 
+    // Library hosting methods.
+    $settings->add(new admin_setting_heading('hostingconfig',
+            get_string('libraryhosting', 'media_jwplayer'), ''));
+
     // Hosting method.
     $hostingmethodchoice = array(
         'cloud' => get_string('hostingmethodcloud', 'media_jwplayer'),
         'self' => get_string('hostingmethodself', 'media_jwplayer'),
     );
     $settings->add(new media_jwplayer_hostingmethod_setting('media_jwplayer/hostingmethod',
-            get_string('hostingmethod', 'media_jwplayer'),
-            get_string('hostingmethoddesc', 'media_jwplayer', MEDIA_JWPLAYER_CLOUD_VERSION),
-            'cloud', $hostingmethodchoice));
+        get_string('hostingmethod', 'media_jwplayer'),
+        get_string('hostingmethoddesc', 'media_jwplayer'),
+        'cloud', $hostingmethodchoice));
+
+    // Cloud-hosted library URL.
+    $settings->add(new admin_setting_configtext('media_jwplayer/libraryurl',
+        get_string('libraryurl', 'media_jwplayer'),
+        get_string('libraryurldesc', 'media_jwplayer'),
+        '', PARAM_URL));
 
     // License key.
     $settings->add(new media_jwplayer_license_setting('media_jwplayer/licensekey',
-            get_string('licensekey', 'media_jwplayer'),
-            get_string('licensekeydesc', 'media_jwplayer'),
-            ''));
+        get_string('licensekey', 'media_jwplayer'),
+        get_string('licensekeydesc', 'media_jwplayer'),
+        ''));
 
     // Enabled extensions.
     $supportedextensions = $jwplayer->list_supported_extensions();

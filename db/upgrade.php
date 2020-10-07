@@ -32,12 +32,22 @@ defined('MOODLE_INTERNAL') || die();
 function xmldb_media_jwplayer_upgrade($oldversion) {
     global $CFG;
 
-    if ($oldversion < 2020100400) {
-        // Remove deprecated configuration.
+    if ($oldversion < 2020100700) {
+        // Remove deprecated settings.
         unset_config('supportrtmp', 'media_jwplayer');
         unset_config('customskincss', 'media_jwplayer');
 
-        upgrade_plugin_savepoint(true, 2020100400, 'media', 'jwplayer');
+        // Clear settings that needs to be highlighted after upgrade and configured again.
+        unset_config('hostingmethod', 'media_jwplayer');
+        unset_config('licensekey', 'media_jwplayer');
+
+        // Update list of enable extensions (remove those no longer supported).
+        $deprecated = ['f4v', 'f4a', 'flv', 'smil'];
+        $extensions = explode(',', get_config('media_jwplayer', 'enabledextensions'));
+        $extensions = array_diff($extensions, $deprecated);
+        set_config('enabledextensions', implode(',', $extensions),'media_jwplayer');
+
+        upgrade_plugin_savepoint(true, 2020100700, 'media', 'jwplayer');
     }
     
     return true;

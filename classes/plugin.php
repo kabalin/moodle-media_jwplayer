@@ -658,10 +658,10 @@ class media_jwplayer_plugin extends core_media_player {
      *
      * @return array Array of strings (extension not including dot e.g. 'mp3')
      */
-    public function list_supported_extensions() {
-        $video = array('mp4', 'm4v', 'f4v', 'mov', 'flv', 'webm', 'ogv');
-        $audio = array('aac', 'm4a', 'f4a', 'mp3', 'ogg', 'oga');
-        $streaming = array('m3u8', 'smil', 'mpd');
+    public static function list_supported_extensions() {
+        $video = ['mp4', 'm4v', 'mov', 'webm', 'ogv'];
+        $audio = ['aac', 'm4a', 'mp3', 'ogg', 'oga'];
+        $streaming = ['m3u8', 'mpd', 'ts', 'fmp4'];
         return array_merge($video, $audio, $streaming);
     }
 
@@ -670,8 +670,8 @@ class media_jwplayer_plugin extends core_media_player {
      *
      * @return array Array of strings
      */
-    public function list_supported_events() {
-        $events = array(
+    public static function list_supported_events() {
+        $events = [
             'playAttempt',
             'play',
             'buffer',
@@ -685,7 +685,7 @@ class media_jwplayer_plugin extends core_media_player {
             'levelsChanged',
             'audioTrackChanged',
             'captionsChanged',
-        );
+        ];
         return $events;
     }
 
@@ -701,16 +701,14 @@ class media_jwplayer_plugin extends core_media_player {
     }
 
     /**
-     * Checks if player is enabled.
+     * Checks if player has configuration sufficient for its using.
      *
-     * @return bool True if player is enabled
+     * @return bool True if player is configured.
      */
     private function is_configured() {
-        global $CFG;
         $hostingmethod = get_config('media_jwplayer', 'hostingmethod');
         $libraryurl = get_config('media_jwplayer', 'libraryurl');
-        if (($hostingmethod === 'cloud') && empty($libraryurl)) {
-            // Cloud mode, but no cloud hosted library URL.
+        if (!$hostingmethod || (($hostingmethod === 'cloud') && empty($libraryurl))) {
             return false;
         }
         return true;
@@ -724,6 +722,11 @@ class media_jwplayer_plugin extends core_media_player {
     */
     public function setup($page) {
         global $CFG;
+
+        if (!$this->is_configured()) {
+            // Not configured properly.
+            return;
+        }
 
         if (self::is_mobile_app_ws_request()) {
             // Nothing to setup here, it is webservice call. Set the flag to fallback

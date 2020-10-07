@@ -28,7 +28,6 @@ if ($ADMIN->fulltree) {
     require_once(__DIR__ . '/lib.php');
     require_once(__DIR__ . '/adminlib.php');
     require_once(__DIR__ . '/classes/plugin.php');
-    $jwplayer = new media_jwplayer_plugin();
 
     // Library hosting methods.
     $settings->add(new admin_setting_heading('hostingconfig',
@@ -57,7 +56,7 @@ if ($ADMIN->fulltree) {
         ''));
 
     // Enabled extensions.
-    $supportedextensions = $jwplayer->list_supported_extensions();
+    $supportedextensions = media_jwplayer_plugin::list_supported_extensions();
     $enabledextensionsmenu = array_combine($supportedextensions, $supportedextensions);
     $settings->add(new admin_setting_configmultiselect('media_jwplayer/enabledextensions',
             get_string('enabledextensions', 'media_jwplayer'),
@@ -65,7 +64,7 @@ if ($ADMIN->fulltree) {
             $supportedextensions, $enabledextensionsmenu));
 
     // Enabled events to log.
-    $supportedevents = $jwplayer->list_supported_events();
+    $supportedevents = media_jwplayer_plugin::list_supported_events();
     $supportedeventsmenu = array_combine($supportedevents, $supportedevents);
     $settings->add(new admin_setting_configmultiselect('media_jwplayer/enabledevents',
             get_string('enabledevents', 'media_jwplayer'),

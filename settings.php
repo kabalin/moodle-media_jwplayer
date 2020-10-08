@@ -31,7 +31,7 @@ if ($ADMIN->fulltree) {
 
     // Library hosting methods.
     $settings->add(new admin_setting_heading('hostingconfig',
-            get_string('libraryhosting', 'media_jwplayer'), ''));
+        get_string('libraryhosting', 'media_jwplayer'), ''));
 
     // Hosting method.
     $hostingmethodchoice = array(
@@ -55,58 +55,68 @@ if ($ADMIN->fulltree) {
         get_string('licensekeydesc', 'media_jwplayer'),
         ''));
 
+    // General.
+    $settings->add(new admin_setting_heading('generalconfig',
+        get_string('general', 'media_jwplayer'), ''));
+
     // Enabled extensions.
     $supportedextensions = media_jwplayer_plugin::list_supported_extensions();
     $enabledextensionsmenu = array_combine($supportedextensions, $supportedextensions);
     $settings->add(new admin_setting_configmultiselect('media_jwplayer/enabledextensions',
-            get_string('enabledextensions', 'media_jwplayer'),
-            get_string('enabledextensionsdesc', 'media_jwplayer'),
-            $supportedextensions, $enabledextensionsmenu));
+        get_string('enabledextensions', 'media_jwplayer'),
+        get_string('enabledextensionsdesc', 'media_jwplayer'),
+        $supportedextensions, $enabledextensionsmenu));
 
     // Enabled events to log.
     $supportedevents = media_jwplayer_plugin::list_supported_events();
     $supportedeventsmenu = array_combine($supportedevents, $supportedevents);
     $settings->add(new admin_setting_configmultiselect('media_jwplayer/enabledevents',
-            get_string('enabledevents', 'media_jwplayer'),
-            get_string('enabledeventsdesc', 'media_jwplayer'),
-            array('play', 'pause', 'complete'), $supportedeventsmenu));
+        get_string('enabledevents', 'media_jwplayer'),
+        get_string('enabledeventsdesc', 'media_jwplayer'),
+        ['play', 'pause', 'complete'], $supportedeventsmenu));
 
     // Appearance related settings.
     $settings->add(new admin_setting_heading('appearanceconfig',
-            get_string('appearanceconfig', 'media_jwplayer'), ''));
+        get_string('appearanceconfig', 'media_jwplayer'), ''));
 
-    // Default Poster Image.
-    $settings->add(new admin_setting_configstoredfile('media_jwplayer/defaultposter',
-            get_string('defaultposter', 'media_jwplayer'),
-            get_string('defaultposterdesc', 'media_jwplayer'),
-            'defaultposter', 0, array('maxfiles' => 1, 'accepted_types' => array('.jpg', '.png'))));
+    // Display Style (Fixed Width or Responsive).
+    $displaystylechoice = [
+        'fixed' => get_string('displayfixed', 'media_jwplayer'),
+        'responsive' => get_string('displayresponsive', 'media_jwplayer'),
+    ];
+    $settings->add(new admin_setting_configselect('media_jwplayer/displaystyle',
+            get_string('displaystyle', 'media_jwplayer'),
+            get_string('displaystyledesc', 'media_jwplayer'),
+            'fixed', $displaystylechoice));
+
+    // Allow empty title.
+    $settings->add(new admin_setting_configcheckbox('media_jwplayer/emptytitle',
+        get_string('emptytitle', 'media_jwplayer'),
+        get_string('emptytitledesc', 'media_jwplayer'),
+        0));
 
     // Download button.
     $settings->add(new admin_setting_configcheckbox('media_jwplayer/downloadbutton',
-            get_string('downloadbutton', 'media_jwplayer'),
-            get_string('downloadbuttondesc', 'media_jwplayer'),
-            0));
+        get_string('downloadbutton', 'media_jwplayer'),
+        get_string('downloadbuttondesc', 'media_jwplayer'),
+        0));
 
     // Playback rate controls.
-    $supportedrates = array('0.25', '0.5', '0.75', '1', '1.25', '1.5', '1.75', '2');
+    $supportedrates = ['0.25', '0.5', '0.75', '1', '1.25', '1.5', '1.75', '2'];
     $supportedratesvalues = array_map(function($param) {
         return $param . 'x';
     }, $supportedrates);
 
     $settings->add(new admin_setting_configmultiselect('media_jwplayer/playbackrates',
-            get_string('playbackrates', 'media_jwplayer'),
-            get_string('playbackratesdesc', 'media_jwplayer'),
-            array('1'), array_combine($supportedrates, $supportedratesvalues)));
+        get_string('playbackrates', 'media_jwplayer'),
+        get_string('playbackratesdesc', 'media_jwplayer'),
+        ['1'], array_combine($supportedrates, $supportedratesvalues)));
 
-    // Display Style (Fixed Width or Responsive).
-    $displaystylechoice = array(
-        'fixed' => get_string('displayfixed', 'media_jwplayer'),
-        'responsive' => get_string('displayresponsive', 'media_jwplayer'),
-    );
-    $settings->add(new admin_setting_configselect('media_jwplayer/displaystyle',
-            get_string('displaystyle', 'media_jwplayer'),
-            get_string('displaystyledesc', 'media_jwplayer'),
-            'fixed', $displaystylechoice));
+    // Default Poster Image.
+    $settings->add(new admin_setting_configstoredfile('media_jwplayer/defaultposter',
+        get_string('defaultposter', 'media_jwplayer'),
+        get_string('defaultposterdesc', 'media_jwplayer'),
+        'defaultposter', 0, ['maxfiles' => 1, 'accepted_types' => ['.jpg', '.png']]));
 
     // Custom skin name.
     $settings->add(new admin_setting_configtext('media_jwplayer/customskinname',
@@ -114,18 +124,12 @@ if ($ADMIN->fulltree) {
         get_string('customskinnamedesc', 'media_jwplayer'),
         '', PARAM_ALPHANUMEXT));
 
-    // Allow empty title.
-    $settings->add(new admin_setting_configcheckbox('media_jwplayer/emptytitle',
-            get_string('emptytitle', 'media_jwplayer'),
-            get_string('emptytitledesc', 'media_jwplayer'),
-            0));
-
     // Google Analytics settings.
     $settings->add(new admin_setting_heading('googleanalyticsconfig',
             get_string('googleanalyticsconfig', 'media_jwplayer'),
             get_string('googleanalyticsconfigdesc', 'media_jwplayer')));
 
-    $addhtml = new moodle_url('/admin/settings.php', array('section' => 'additionalhtml'));
+    $addhtml = new moodle_url('/admin/settings.php', ['section' => 'additionalhtml']);
     $settings->add(new admin_setting_configcheckbox('media_jwplayer/googleanalytics',
             get_string('googleanalytics', 'media_jwplayer'),
             get_string('googleanalyticsdesc', 'media_jwplayer', $addhtml->out()),

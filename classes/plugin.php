@@ -436,13 +436,12 @@ class media_jwplayer_plugin extends core_media_player {
      */
     private function embed_jwplayer($urls, $name, $width, $height, $options) {
         global $PAGE, $CFG;
+
         $mediamanager = core_media_manager::instance();
         $output = '';
 
-        $sources = array();
-        $streams = array();
-        $playersetupdata = array();
-
+        $sources = [];
+        $stream = false;
         foreach ($urls as $url) {
             // Add the details for this source.
             $source = array(
@@ -453,11 +452,13 @@ class media_jwplayer_plugin extends core_media_player {
             if ($ext === 'mov') {
                 $source['type'] = 'mp4';
             }
+            // Check if this is a stream.
+            $stream = in_array($ext, ['m3u8', 'mpd', 'ts', 'fmp4']);
+
             $sources[] = $source;
         }
 
         // Make sure that stream URLs are at the start of the list and set up playlist.
-        $sources = array_merge($streams, $sources);
         $playlistitem = array('sources' => $sources);
 
         // Set Title from title attribute of a tag if it has one if not default to filename.
@@ -492,7 +493,7 @@ class media_jwplayer_plugin extends core_media_player {
             $playlistitem['tracks'] = $options['subtitles'];
         }
 
-        $playersetupdata['playlist'] = array($playlistitem);
+        $playersetupdata = ['playlist' => array($playlistitem)];
 
         // If width and/or height are set in the options override those from URL or defaults.
         if (isset($options['width'])) {
@@ -608,7 +609,7 @@ class media_jwplayer_plugin extends core_media_player {
         $playersetup->setupdata = $playersetupdata;
 
         // Add download button if required and supported.
-        if (get_config('media_jwplayer', 'downloadbutton') && !count($streams)) {
+        if (get_config('media_jwplayer', 'downloadbutton') && !$stream) {
             $playersetup->downloadbtn = array(
                 'img' => $CFG->wwwroot.'/media/player/jwplayer/pix/download.png',
                 'tttext' => get_string('videodownloadbtntttext', 'media_jwplayer'),

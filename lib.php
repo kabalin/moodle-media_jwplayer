@@ -62,7 +62,7 @@ if (!defined('MEDIA_JWPLAYER_AUDIO_HEIGHT')) {
  * @param array $options Array of options.
  * @return void|false
  */
-function media_jwplayer_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = array()) {
+function media_jwplayer_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
 
     if ($context->contextlevel != CONTEXT_SYSTEM) {
         send_file_not_found();

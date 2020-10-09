@@ -51,7 +51,7 @@ class media_jwplayer_plugin extends core_media_player {
         global $CFG;
 
         // Process tag and populate options.
-        $playeroptions = array('globalattributes' => array());
+        $playeroptions = ['globalattributes' => []];
         if (!empty($options[core_media_manager::OPTION_ORIGINAL_TEXT])) {
             // Determine the type of media tag.
             preg_match('/^<(video|audio|a)\b/i', $options[core_media_manager::OPTION_ORIGINAL_TEXT], $matches);
@@ -86,14 +86,15 @@ class media_jwplayer_plugin extends core_media_player {
             // make JS modules initialised. Check if we can fallback to html5 video/audio.
             require_once($CFG->libdir . '/filelib.php');
             $supportedextensions = file_get_typegroup('extension', ['html_video', 'html_audio']);
-            $sources = array();
-            $isaudio = null;
+            $manager = core_media_manager::instance();
+            $sources = [];
+            $isaudio = false;
             // Check URLs if they can be used for html5. Even if we had html5 video source,
             // we go through links anyway to add mimetype.
             foreach ($urls as $url) {
                 // Get extension and mimetype.
-                $ext = core_media_manager::instance()->get_extension($url);
-                $mimetype = core_media_manager::instance()->get_mimetype($url);
+                $ext = $manager->get_extension($url);
+                $mimetype = $manager->get_mimetype($url);
 
                 if ($ext === 'm3u8') {
                     // HLS. Only reason we do mimetype overriding here is because setting
@@ -105,11 +106,11 @@ class media_jwplayer_plugin extends core_media_player {
                     continue;
                 }
 
-                if ($isaudio === null) {
+                if ($isaudio === false) {
                     // Flag is we deal with audio.
-                    $isaudio = in_array('.' . $ext, file_get_typegroup('extension', 'audio'));
+                    $isaudio = in_array('.' . $ext, file_get_typegroup('extension', 'html_audio'));
                 }
-                $source = html_writer::empty_tag('source', array('src' => $url, 'type' => $mimetype));
+                $source = html_writer::empty_tag('source', ['src' => $url, 'type' => $mimetype]);
                 $sources[] = $source;
             }
             if (count($sources)) {
@@ -124,7 +125,7 @@ class media_jwplayer_plugin extends core_media_player {
 
                 if ($tagtype === 'a') {
                     // Faling back to html5 media.
-                    $attributes = array();
+                    $attributes = [];
                     // Set Title from title attribute of a tag if it has one if not default to filename.
                     if (isset($playeroptions['globalattributes']['title'])) {
                         $attributes['title'] = (string) $playeroptions['globalattributes']['title'];
@@ -179,9 +180,9 @@ class media_jwplayer_plugin extends core_media_player {
      * @param string $originalhtml Original HTML snippet.
      * @return array Player options.
      */
-    private function get_options_from_media_tag($originalhtml) {
+    private function get_options_from_media_tag($originalhtml): array {
 
-        $playeroptions = array('globalattributes' => array());
+        $playeroptions = ['globalattributes' => []];
         $globalattributes = self::get_global_attributes();
 
         // Determine media type.
@@ -189,7 +190,7 @@ class media_jwplayer_plugin extends core_media_player {
         $type = $matches[1];
 
         // Get attributes.
-        $attributes = array();
+        $attributes = [];
         $tag = $originalhtml;
         while (preg_match('/^(<[^>]*\b)(\w+)="(.*?)"(.*)$/is', $tag, $matches)) {
             // Attribute with value, e.g. width="500".
@@ -227,10 +228,10 @@ class media_jwplayer_plugin extends core_media_player {
 
         // Parse tracks.
         if (preg_match_all('~</?track\b[^>]*>~im', $originalhtml, $matches)) {
-            $tracks = array();
+            $tracks = [];
             foreach ($matches[0] as $trackhtml) {
                 // Determine track attributes.
-                $trackattributes = array();
+                $trackattributes = [];
                 while (preg_match('/^(<[^>]*\b)(\w+)="(.*?)"(.*)$/is', $trackhtml, $matches)) {
                     // Attribute with value, e.g. width="500".
                     $trackhtml = $matches[1] . $matches[4];
@@ -252,12 +253,12 @@ class media_jwplayer_plugin extends core_media_player {
                 unset($trackattributes['track']);
 
                 // We popluate track data according to JWPlayer requirements.
-                // https://developer.jwplayer.com/jw-player/docs/developer-guide/jw7/configuration-reference/#playlist-tracks
+                // https://developer.jwplayer.com/jwplayer/docs/jw8-player-configuration-reference#section-playlist-tracks
                 // HTML5 track spec: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track
-                $validkinds = array('subtitles', 'captions', 'chapters');
+                $validkinds = ['subtitles', 'captions', 'chapters'];
                 if ($trackattributes['src'] && (empty($trackattributes['kind']) || in_array($trackattributes['kind'], $validkinds))) {
                     // Track file.
-                    $track = array('file' => clean_param($trackattributes['src'], PARAM_URL));
+                    $track = ['file' => clean_param($trackattributes['src'], PARAM_URL)];
 
                     // Labels.
                     if (isset($trackattributes['label'])) {
@@ -303,9 +304,9 @@ class media_jwplayer_plugin extends core_media_player {
      * @param array $attributes Array of attributes in name => (str)value format.
      * @return array Player options.
      */
-    private function get_options_from_a_tag_attributes($attributes) {
+    private function get_options_from_a_tag_attributes($attributes): array {
 
-        $playeroptions = array('globalattributes' => array());
+        $playeroptions = ['globalattributes' => []];
         $globalattributes = self::get_global_attributes();
 
         foreach ($attributes as $attrib => $atval) {
@@ -318,21 +319,21 @@ class media_jwplayer_plugin extends core_media_player {
                     // For subtitles, we need to parse attribute content and build array of tracks.
                     // Split into tracks.
                     $atvalarray = preg_split('~[,;] ~', $atval);
-                    $tracks = array();
+                    $tracks = [];
                     foreach ($atvalarray as $trackdata) {
                         // Track can be specified in two formats, with label ('English: https://URL')
                         // or just URL.
                         $trackdata = explode(': ', $trackdata, 2);
                         if (count($trackdata) === 2) {
                             // Label has been provided.
-                            $tracks[] = array(
+                            $tracks[] = [
                                 'label' => trim($trackdata[0]),
                                 'file' => clean_param($trackdata[1], PARAM_URL),
-                            );
+                            ];
                         } else {
-                            $tracks[] = array(
+                            $tracks[] = [
                                 'file' => clean_param($trackdata[0], PARAM_URL),
-                            );
+                            ];
                         }
                     }
                     $atval = $tracks;
@@ -436,7 +437,6 @@ class media_jwplayer_plugin extends core_media_player {
      */
     private function embed_jwplayer($urls, $name, $width, $height, $options) {
         global $PAGE, $CFG;
-
         $mediamanager = core_media_manager::instance();
         $output = '';
 
@@ -444,9 +444,7 @@ class media_jwplayer_plugin extends core_media_player {
         $stream = false;
         foreach ($urls as $url) {
             // Add the details for this source.
-            $source = array(
-                'file' => urldecode($url->out(false)),
-            );
+            $source = ['file' => urldecode($url->out(false))];
             // Help to determine the type of mov.
             $ext = $mediamanager->get_extension($url);
             if ($ext === 'mov') {
@@ -459,7 +457,7 @@ class media_jwplayer_plugin extends core_media_player {
         }
 
         // Make sure that stream URLs are at the start of the list and set up playlist.
-        $playlistitem = array('sources' => $sources);
+        $playlistitem = ['sources' => $sources];
 
         // Set Title from title attribute of a tag if it has one if not default to filename.
         if (isset($options['globalattributes']['title'])) {
@@ -493,7 +491,7 @@ class media_jwplayer_plugin extends core_media_player {
             $playlistitem['tracks'] = $options['subtitles'];
         }
 
-        $playersetupdata = ['playlist' => array($playlistitem)];
+        $playersetupdata = ['playlist' => [$playlistitem]];
 
         // If width and/or height are set in the options override those from URL or defaults.
         if (isset($options['width'])) {
@@ -525,7 +523,7 @@ class media_jwplayer_plugin extends core_media_player {
         $playersetupdata['width'] = $width;
 
         // If width is a percentage surrounding span needs to have its width set so it does not default to 0px.
-        $outerspanargs = array('class' => 'jwplayer_playerblock');
+        $outerspanargs = ['class' => 'jwplayer_playerblock'];
         if (!is_numeric($width)) {
             $outerspanargs['style'] = 'width: '.$width.';';
             $width = '100%';  // As the outer span in now at the required width, we set the width of the player to 100%.
@@ -598,10 +596,10 @@ class media_jwplayer_plugin extends core_media_player {
                 $galabel = get_config('media_jwplayer', 'galabel');
             }
 
-            $playersetupdata['ga'] = array(
+            $playersetupdata['ga'] = [
                 'idstring' => $gaidstring,
                 'label' => $galabel
-            );
+            ];
         }
 
         $playersetup = new stdClass();
@@ -610,10 +608,10 @@ class media_jwplayer_plugin extends core_media_player {
 
         // Add download button if required and supported.
         if (get_config('media_jwplayer', 'downloadbutton') && !$stream) {
-            $playersetup->downloadbtn = array(
+            $playersetup->downloadbtn = [
                 'img' => $CFG->wwwroot.'/media/player/jwplayer/pix/download.png',
                 'tttext' => get_string('videodownloadbtntttext', 'media_jwplayer'),
-            );
+            ];
         }
 
         // Pass the page context variables for logging

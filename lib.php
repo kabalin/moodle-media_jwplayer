@@ -24,32 +24,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-if (!defined('MEDIA_JWPLAYER_VIDEO_WIDTH_RESPONSIVE')) {
-    // Default video width if no width is specified.
-    // May be defined in config.php if required.
-    define('MEDIA_JWPLAYER_VIDEO_WIDTH_RESPONSIVE', '100%');
-}
-if (!defined('MEDIA_JWPLAYER_VIDEO_ASPECTRATIO_W')) {
-    // Default video aspect ratio for responsive mode if no height is specified.
-    // May be defined in config.php if required.
-    define('MEDIA_JWPLAYER_VIDEO_ASPECTRATIO_W', 16);
-}
-if (!defined('MEDIA_JWPLAYER_VIDEO_ASPECTRATIO_H')) {
-    // Default video aspect ratio for responsive mode if no height is specified.
-    // May be defined in config.php if required.
-    define('MEDIA_JWPLAYER_VIDEO_ASPECTRATIO_H', 9);
-}
-if (!defined('MEDIA_JWPLAYER_AUDIO_WIDTH')) {
-    // Default audio width if no width is specified.
-    // May be defined in config.php if required.
-    define('MEDIA_JWPLAYER_AUDIO_WIDTH', 400);
-}
-if (!defined('MEDIA_JWPLAYER_AUDIO_HEIGHT')) {
-    // Default audio heigth if no height is specified.
-    // May be defined in config.php if required.
-    define('MEDIA_JWPLAYER_AUDIO_HEIGHT', 30);
-}
-
 /**
  * File serving.
  *

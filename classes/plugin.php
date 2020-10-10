@@ -37,6 +37,13 @@ class media_jwplayer_plugin extends core_media_player {
     /** @var bool is this called from mobile app. */
     protected $ismobileapp = false;
 
+    /** Player width in responsive mode. */
+    const VIDEO_WIDTH_RESPONSIVE = '100%';
+    /** Default aspect ratio in responsive mode. */
+    const VIDEO_ASPECTRATIO = '16:9';
+    /** Player height required to enable audio mode. */
+    const AUDIO_HEIGHT = '40';
+
     /**
      * Generates code required to embed the player.
      *
@@ -88,7 +95,7 @@ class media_jwplayer_plugin extends core_media_player {
             $supportedextensions = file_get_typegroup('extension', ['html_video', 'html_audio']);
             $manager = core_media_manager::instance();
             $sources = [];
-            $isaudio = false;
+            $isaudio = null;
             // Check URLs if they can be used for html5. Even if we had html5 video source,
             // we go through links anyway to add mimetype.
             foreach ($urls as $url) {
@@ -106,7 +113,7 @@ class media_jwplayer_plugin extends core_media_player {
                     continue;
                 }
 
-                if ($isaudio === false) {
+                if ($isaudio === null) {
                     // Flag is we deal with audio.
                     $isaudio = in_array('.' . $ext, file_get_typegroup('extension', 'html_audio'));
                 }
@@ -441,7 +448,8 @@ class media_jwplayer_plugin extends core_media_player {
         $output = '';
 
         $sources = [];
-        $stream = false;
+        $isstream = null;
+        $isaudio = null;
         foreach ($urls as $url) {
             // Add the details for this source.
             $source = ['file' => urldecode($url->out(false))];
@@ -451,7 +459,13 @@ class media_jwplayer_plugin extends core_media_player {
                 $source['type'] = 'mp4';
             }
             // Check if this is a stream.
-            $stream = in_array($ext, ['m3u8', 'mpd', 'ts', 'fmp4']);
+            if ($isstream === null) {
+                $isstream = in_array($ext, ['m3u8', 'mpd', 'ts', 'fmp4']);
+            }
+            // Check if this is audio.
+            if ($isaudio === null) {
+                $isaudio = in_array('.' . $ext, file_get_typegroup('extension', 'html_audio'));
+            }
 
             $sources[] = $source;
         }
@@ -462,6 +476,7 @@ class media_jwplayer_plugin extends core_media_player {
         // Set Title from title attribute of a tag if it has one if not default to filename.
         if (isset($options['globalattributes']['title'])) {
             $playlistitem['title'] = (string) $options['globalattributes']['title'];
+            unset ($options['globalattributes']['title']);
         } else if (!get_config('media_jwplayer', 'emptytitle')) {
             $playlistitem['title'] = $this->get_name($name, $urls);
         }
@@ -493,64 +508,28 @@ class media_jwplayer_plugin extends core_media_player {
 
         $playersetupdata = ['playlist' => [$playlistitem]];
 
-        // If width and/or height are set in the options override those from URL or defaults.
-        if (isset($options['width'])) {
-            $width = $options['width'];
-        }
-        if (isset($options['height'])) {
-            $height = $options['height'];
-        }
-
-        // If we are dealing with audio, show just the control bar.
-        if (mimeinfo('string', $sources[0]['file']) === 'audio') {
-            $width = MEDIA_JWPLAYER_AUDIO_WIDTH;
-            $height = MEDIA_JWPLAYER_AUDIO_HEIGHT;
+        // Setup player size.
+        // If we are dealing with audio, show just the control bar of default width.
+        if ($isaudio) {
+            parent::pick_video_size($width, $height);
+            $height = self::AUDIO_HEIGHT;
         }
 
-        // If width is not provided, use default.
+        // Unless we have size defined in element containing media URL, use settings.
         if (!$width) {
-            // Use responsive width if choosen in settings otherwise default to fixed width.
+            // Use responsive width if choosen in settings otherwise default to fixed size.
             if (get_config('media_jwplayer', 'displaystyle') === 'responsive') {
-                $width = MEDIA_JWPLAYER_VIDEO_WIDTH_RESPONSIVE;
+                $width = self::VIDEO_WIDTH_RESPONSIVE;
+                // Aspectratio is only valid parameter for non fixed size.
+                $playersetupdata['aspectratio'] = $options['aspectratio'] ?? self::VIDEO_ASPECTRATIO;
             } else {
-                $width = $CFG->media_default_width;
+                parent::pick_video_size($width, $height);
             }
-        }
-
-        if (is_numeric($width)) {
-            $width = round($width);
         }
         $playersetupdata['width'] = $width;
-
-        // If width is a percentage surrounding span needs to have its width set so it does not default to 0px.
-        $outerspanargs = ['class' => 'jwplayer_playerblock'];
-        if (!is_numeric($width)) {
-            $outerspanargs['style'] = 'width: '.$width.';';
-            $width = '100%';  // As the outer span in now at the required width, we set the width of the player to 100%.
-        }
-
-        // Automatically set the height unless it is specified.
-        if ($height) {
-            if (is_numeric($height)) {
-                $playersetupdata['height'] = $height;
-            } else if (is_numeric($width)) {
-                // If width is numeric and height is percentage, calculate height from width.
-                $playersetupdata['height'] = round($width * floatval($height) / 100);
-            } else {
-                // If width is also percentage, then set aspect ratio.
-                $playersetupdata['aspectratio'] = "100:".floatval($height);
-            }
-        } else {
-            if (is_numeric($width)) {
-                // If width is numeric calculate height from default aspect ratio.
-                $playersetupdata['height'] = round($width * MEDIA_JWPLAYER_VIDEO_ASPECTRATIO_H / MEDIA_JWPLAYER_VIDEO_ASPECTRATIO_W);
-            } else if (isset($options['aspectratio'])) {
-                // Responsive videos need aspect ratio set to automatically set height, if this is set in $options use that.
-                $playersetupdata['aspectratio'] = $options['aspectratio'];
-            } else {
-                // Use default aspectration.
-                $playersetupdata['aspectratio'] = MEDIA_JWPLAYER_VIDEO_ASPECTRATIO_W.":".MEDIA_JWPLAYER_VIDEO_ASPECTRATIO_H;
-            }
+        if ($height && empty($playersetupdata['aspectratio'])) {
+            // Height needs to be defined only if we don't have aspectratio.
+            $playersetupdata['height'] = $height;
         }
 
         // Set additional player options: autostart, mute, controls, repeat.
@@ -607,7 +586,7 @@ class media_jwplayer_plugin extends core_media_player {
         $playersetup->setupdata = $playersetupdata;
 
         // Add download button if required and supported.
-        if (get_config('media_jwplayer', 'downloadbutton') && !$stream) {
+        if (get_config('media_jwplayer', 'downloadbutton') && !$isstream) {
             $playersetup->downloadbtn = [
                 'img' => $CFG->wwwroot.'/media/player/jwplayer/pix/download.png',
                 'tttext' => get_string('videodownloadbtntttext', 'media_jwplayer'),
@@ -618,20 +597,10 @@ class media_jwplayer_plugin extends core_media_player {
         $playersetup->logcontext = $PAGE->context->id;
         $playersetup->logevents = $this->get_supported_events();
 
-        // Set required class for player span tag.
-        if (isset($options['globalattributes']['class'])) {
-            $options['globalattributes']['class'] .= ' jwplayer_media';
-        } else {
-            $options['globalattributes']['class'] = 'jwplayer_media';
-        }
-
         // Set up the player.
-        $PAGE->requires->js_call_amd('media_jwplayer/jwplayer', 'setupPlayer', array($playersetup));
-        $playerdiv = html_writer::tag('span', self::LINKPLACEHOLDER, array('id' => $playerid));
-        $outerspan = html_writer::tag('span', $playerdiv, $outerspanargs);
-        $output .= html_writer::tag('span', $outerspan, $options['globalattributes']);
-
-        return $output;
+        $PAGE->requires->js_call_amd('media_jwplayer/jwplayer', 'setupPlayer', [$playersetup]);
+        $playerdiv = html_writer::div(self::LINKPLACEHOLDER, '', ['id' => $playerid]);
+        return html_writer::div($playerdiv, 'mediaplugin mediaplugin_jwplayer d-block', $options['globalattributes']);
     }
 
     /**

@@ -79,15 +79,25 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_heading('appearanceconfig',
         get_string('appearanceconfig', 'media_jwplayer'), ''));
 
-    // Display Style (Fixed Width or Responsive).
-    $displaystylechoice = [
+    // Display mode (fixed or responsive).
+    $displaymodechoice = [
+        'fixedwidth' => get_string('displayfixedwidth', 'media_jwplayer'),
         'fixed' => get_string('displayfixed', 'media_jwplayer'),
         'responsive' => get_string('displayresponsive', 'media_jwplayer'),
     ];
-    $settings->add(new admin_setting_configselect('media_jwplayer/displaystyle',
-            get_string('displaystyle', 'media_jwplayer'),
-            get_string('displaystyledesc', 'media_jwplayer'),
-            'fixed', $displaystylechoice));
+    $commonsettings = new moodle_url('/admin/settings.php', ['section' => 'managemediaplayers']);
+    $settings->add(new admin_setting_configselect('media_jwplayer/displaymode',
+            get_string('displaymode', 'media_jwplayer'),
+            get_string('displaymodedesc', 'media_jwplayer', $commonsettings->out()),
+            'fixedwidth', $displaymodechoice));
+
+    // Aspect ratio.
+    $aspectratiochoice = ['16:9', '16:10', '9:16', '4:3', '3:2', '1:1', '2.4:1'];
+    $aspectratiochoice = array_combine($aspectratiochoice, $aspectratiochoice);
+    $settings->add(new admin_setting_configselect('media_jwplayer/aspectratio',
+            get_string('aspectratio', 'media_jwplayer'),
+            get_string('aspectratiodesc', 'media_jwplayer'),
+            media_jwplayer_plugin::VIDEO_ASPECTRATIO, $aspectratiochoice));
 
     // Allow empty title.
     $settings->add(new admin_setting_configcheckbox('media_jwplayer/emptytitle',

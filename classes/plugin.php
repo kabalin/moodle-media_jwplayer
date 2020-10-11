@@ -141,8 +141,7 @@ class media_jwplayer_plugin extends core_media_player {
                     }
 
                     // Set size.
-                    if (get_config('media_jwplayer', 'displaystyle') !== 'responsive') {
-                        // Note we ignore limitsize setting if not responsive.
+                    if (get_config('media_jwplayer', 'displaymode') !== 'responsive') {
                         parent::pick_video_size($width, $height);
                         $attributes += ['width' => $width] + ($height ? ['height' => $height] : []);
                     }
@@ -518,18 +517,30 @@ class media_jwplayer_plugin extends core_media_player {
         // Unless we have size defined in element containing media URL, use settings.
         if (!$width) {
             // Use responsive width if choosen in settings otherwise default to fixed size.
-            if (get_config('media_jwplayer', 'displaystyle') === 'responsive') {
+            if (get_config('media_jwplayer', 'displaymode') === 'responsive') {
                 $width = self::VIDEO_WIDTH_RESPONSIVE;
-                // Aspectratio is only valid parameter for non fixed size.
-                $playersetupdata['aspectratio'] = $options['aspectratio'] ?? self::VIDEO_ASPECTRATIO;
+                $playersetupdata['aspectratio'] = $options['aspectratio'] ?? get_config('media_jwplayer', 'aspectratio');
+            } else if (get_config('media_jwplayer', 'displaymode') === 'fixedwidth') {
+                $width = $CFG->media_default_width;
+                $height = 0;
             } else {
+                // Fixed width and height.
                 parent::pick_video_size($width, $height);
             }
         }
         $playersetupdata['width'] = $width;
-        if ($height && empty($playersetupdata['aspectratio'])) {
-            // Height needs to be defined only if we don't have aspectratio.
-            $playersetupdata['height'] = $height;
+        if (empty($playersetupdata['aspectratio'])) {
+            // Height needs to be defined only if we don't have aspectratio (i.e. not in responsive mode).
+            if ($height) {
+                // Height is known.
+                $playersetupdata['height'] = $height;
+            } else {
+                // We are either in 'fixedwidth' display mode or source media has only width defined.
+                // Calculate height using aspectratio proportion.
+                $aspectratio = $options['aspectratio'] ?? get_config('media_jwplayer', 'aspectratio');
+                list($x, $y) = explode(':', $aspectratio);
+                $playersetupdata['height'] = round((int) $width * (int) $y / (int) $x);
+            }
         }
 
         // Set additional player options: autostart, mute, controls, repeat.

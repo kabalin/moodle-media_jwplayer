@@ -25,13 +25,16 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['appearanceconfig'] = 'Appearance';
+$string['aspectratio'] = 'Aspect ratio';
+$string['aspectratiodesc'] = 'Defines player proportions when Display mode is "Fixed width" or "Responsive". Also used when dimensions are set in media, but height is not defined.';
 $string['customskinname'] = 'Custom skin name';
 $string['customskinnamedesc'] = 'The name of your custom CSS skin to use for styling the player. The skin name will be appended to the <tt>.jw-skin-</tt> prefix and used in player element, this allows user to override player style by defining the class in Moodle theme as described in <a href="https://developer.jwplayer.com/jwplayer/docs/jw8-branding">Branding documentation</a>.';
 $string['defaultposter'] = 'Default poster';
 $string['defaultposterdesc'] = 'Default poster image to use with videos.';
-$string['displaystyle'] = 'Display Style';
-$string['displaystyledesc'] = 'Default display style to use for videos if no video width specified.';
-$string['displayfixed'] = 'Fixed Width';
+$string['displaymode'] = 'Display mode';
+$string['displaymodedesc'] = 'Display mode to use if dimensions are not defined in the element containing the media. In "Fixed" mode, player dimensions are static and <a href="{$a}">Common settings</a> default values of width and height are used. In "Fixed width" mode, width is default, but height is determined based on aspect ratio setting. Finally, in "Responsive mode" player expands to 100% and its proportions are set according to aspect ratio setting.';
+$string['displayfixed'] = 'Fixed';
+$string['displayfixedwidth'] = 'Fixed width';
 $string['displayresponsive'] = 'Responsive';
 $string['downloadbutton'] = 'Download button';
 $string['downloadbuttondesc'] = 'Add download button to the control bar.';

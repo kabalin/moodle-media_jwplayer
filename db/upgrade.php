@@ -32,7 +32,7 @@ defined('MOODLE_INTERNAL') || die();
 function xmldb_media_jwplayer_upgrade($oldversion) {
     global $CFG;
 
-    if ($oldversion < 2020101100) {
+    if ($oldversion < 2020101200) {
         // Remove deprecated settings.
         unset_config('supportrtmp', 'media_jwplayer');
         unset_config('customskincss', 'media_jwplayer');
@@ -48,8 +48,7 @@ function xmldb_media_jwplayer_upgrade($oldversion) {
         $extensions = array_diff($extensions, $deprecated);
         set_config('enabledextensions', implode(',', $extensions), 'media_jwplayer');
 
-        // Renamed settings.
-        // 'fixed' displaystyle now implies fixed width and height.
+        // Renamed settings: 'fixed' displaystyle now implies fixed width and height.
         $displaymode = get_config('media_jwplayer', 'displaystyle');
         if ($displaymode === 'fixed') {
             $displaymode = 'fixedwidth';
@@ -57,7 +56,7 @@ function xmldb_media_jwplayer_upgrade($oldversion) {
         set_config('displaymode', $displaymode, 'media_jwplayer');
         unset_config('displaystyle', 'media_jwplayer');
 
-        upgrade_plugin_savepoint(true, 2020101100, 'media', 'jwplayer');
+        upgrade_plugin_savepoint(true, 2020101200, 'media', 'jwplayer');
     }
     
     return true;

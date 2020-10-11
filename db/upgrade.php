@@ -36,6 +36,7 @@ function xmldb_media_jwplayer_upgrade($oldversion) {
         // Remove deprecated settings.
         unset_config('supportrtmp', 'media_jwplayer');
         unset_config('customskincss', 'media_jwplayer');
+        unset_config('gaidstring', 'media_jwplayer');
 
         // Clear settings that needs to be highlighted after upgrade and configured again.
         unset_config('hostingmethod', 'media_jwplayer');

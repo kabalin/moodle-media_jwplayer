@@ -485,11 +485,9 @@ class media_jwplayer_plugin extends core_media_player {
             $playlistitem['description'] = $options['description'];
         }
 
-        // Setup video mediaid and use this for the playerid.
-        $playerid = 'media_jwplayer_media_' . html_writer::random_id();
+        // Setup video mediaid.
         if (isset($options['mediaid']) && strlen(trim($options['mediaid']))) {
             $playlistitem['mediaid'] = $options['mediaid'];
-            $playerid = 'media_jwplayer_media_' . preg_replace('/\s+/', '', $options['mediaid']);
         }
 
         // Setup poster image.
@@ -572,26 +570,16 @@ class media_jwplayer_plugin extends core_media_player {
             $playersetupdata['playbackRateControls'] = $playbackrates;
         }
 
-        // Set Google Analytics settings if enabled.
+        // Google Analytics settings.
         if (get_config('media_jwplayer', 'googleanalytics')) {
-            if (isset($options['gaidstring'])) {
-                $gaidstring = $options['gaidstring'];
-            } else {
-                $gaidstring = get_config('media_jwplayer', 'gaidstring');
+            $playersetupdata['ga'] = [];
+            $galabel = $options['galabel'] ?? get_config('media_jwplayer', 'galabel');
+            if ($galabel) {
+                $playersetupdata['ga']['label'] = $galabel;
             }
-
-            if (isset($options['galabel'])) {
-                $galabel = $options['galabel'];
-            } else {
-                $galabel = get_config('media_jwplayer', 'galabel');
-            }
-
-            $playersetupdata['ga'] = [
-                'idstring' => $gaidstring,
-                'label' => $galabel
-            ];
         }
 
+        $playerid = 'media_jwplayer_' . html_writer::random_id('');
         $playersetup = new stdClass();
         $playersetup->playerid = $playerid;
         $playersetup->setupdata = $playersetupdata;

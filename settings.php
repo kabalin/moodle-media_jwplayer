@@ -145,13 +145,8 @@ if ($ADMIN->fulltree) {
             get_string('googleanalyticsdesc', 'media_jwplayer', $addhtml->out()),
             0));
 
-    $settings->add(new admin_setting_configtext('media_jwplayer/gaidstring',
-            get_string('gaidstring', 'media_jwplayer'),
-            get_string('gaidstringdesc', 'media_jwplayer'),
-            'file'));
-
     $settings->add(new admin_setting_configtext('media_jwplayer/galabel',
             get_string('galabel', 'media_jwplayer'),
             get_string('galabeldesc', 'media_jwplayer'),
-            'file'));
+            ''));
 }

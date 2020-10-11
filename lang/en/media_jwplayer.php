@@ -76,6 +76,6 @@ $string['paideditionsconfig'] = 'Settings for paid editions of JW Player';
 $string['paideditionsconfigdescr'] = 'Settings below only work with Pro, Premium and Ads editions. They have no effect for free edition.';
 $string['playbackrates'] = 'Playback rate button';
 $string['playbackratesdesc'] = 'Display a button in the controlbar to adjust playback speed. Select speeds that need to be available for users. To disable control, select only \'1x\' or leave no options selected.';
-$string['pluginname'] = 'JW Player';
+$string['pluginname'] = 'JW Player 8';
 $string['privacy:metadata'] = 'JWPlayer plugin does not store any personal data.';
 $string['videodownloadbtntttext'] = 'Download Video';

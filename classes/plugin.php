@@ -710,13 +710,14 @@ class media_jwplayer_plugin extends core_media_player {
             $jwplayer = new moodle_url($CFG->httpswwwroot.'/media/player/jwplayer/jwplayer/jwplayer');
 
             // Set license key.
-            $licensekey = get_config('media_jwplayer', 'licensekey');
-            $licensejs = 'require.config({ config: {\'media_jwplayer/jwplayer\': { licensekey: \'' . $licensekey . '\'}}})';
+            $config = ['config' => ['media_jwplayer/jwplayer' => ['licensekey' => get_config('media_jwplayer', 'licensekey')]]];
+            $licensejs = 'require.config(' . json_encode($config) . ')';
             $page->requires->js_amd_inline($licensejs);
         }
 
         // Define jwplayer module.
-        $requirejs = 'require.config({ paths: {\'jwplayer\': \'' . $jwplayer->out() . '\'}})';
+        $config = ['paths' => ['jwplayer' => $jwplayer->out()]];
+        $requirejs = 'require.config(' . json_encode($config) . ')';
         $page->requires->js_amd_inline($requirejs);
     }
 

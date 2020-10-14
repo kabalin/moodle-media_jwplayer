@@ -53,7 +53,7 @@ if ($ADMIN->fulltree) {
     $settings->add(new media_jwplayer_license_setting('media_jwplayer/licensekey',
         get_string('licensekey', 'media_jwplayer'),
         get_string('licensekeydesc', 'media_jwplayer'),
-        ''));
+        '', PARAM_RAW_TRIMMED));
 
     // General.
     $settings->add(new admin_setting_heading('generalconfig',

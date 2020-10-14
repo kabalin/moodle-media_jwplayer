@@ -84,8 +84,11 @@ define(['jwplayer', 'jquery', 'core/config', 'core/yui', 'core/log', 'module'], 
      * @param {Object[]} event JW Player event.
      */
     var logerror = function(event) {
-        var errormsg = this.getPlaylistItem().title + ' ' + event.type + ': ' + event.message;
-        log.error(errormsg);
+        if (this.getPlaylistItem()) {
+            log.error(this.getPlaylistItem().title + ' ' + event.type + ': ' + event.message);
+        } else {
+            log.error(event.message);
+        }
     };
 
     return {
@@ -97,11 +100,8 @@ define(['jwplayer', 'jquery', 'core/config', 'core/yui', 'core/log', 'module'], 
          * @return {void}
          */
         setupPlayer: function (playersetup) {
-            // Unfortunately other loaded parts of JW player assume that jwplayer
-            // lives in window.jwplayer, so we need this hack.
-            window.jwplayer = window.jwplayer || jwplayer;
             if (module.config().licensekey) {
-                window.jwplayer.key = module.config().licensekey;
+                jwplayer.key = module.config().licensekey;
             }
 
             logcontext = playersetup.logcontext;

@@ -45,7 +45,8 @@ function media_jwplayer_pluginfile($course, $cm, $context, $filearea, $args, $fo
     if ($filearea !== 'defaultposter') {
         send_file_not_found();
     }
-    // Make sure the user is logged in and has access to the module (plugins that are not course modules should leave out the 'cm' part).
+    // Make sure the user is logged in and has access to the module
+    // (plugins that are not course modules should leave out the 'cm' part).
     require_login($course, true);
 
     // All good. Serve the exported data.

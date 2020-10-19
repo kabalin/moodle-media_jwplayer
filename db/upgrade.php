@@ -26,11 +26,12 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
+ * Upgrade routines for media_jwplayer.
+ *
  * @param int $oldversion the version we are upgrading from
  * @return bool result
  */
 function xmldb_media_jwplayer_upgrade($oldversion) {
-    global $CFG;
 
     if ($oldversion < 2020101200) {
         // Remove deprecated settings.

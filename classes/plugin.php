@@ -108,7 +108,7 @@ class media_jwplayer_plugin extends core_media_player {
                     // $CFG->customfiletypes temporarly won't change file_get_typegroup()
                     // output presumably because of caching.
                     $mimetype = 'application/x-mpegURL';
-                } else if (!in_array('.' . $ext, $supportedextensions)){
+                } else if (!in_array('.' . $ext, $supportedextensions)) {
                     // Extension is not supported for use in html5 video/audio.
                     continue;
                 }
@@ -127,7 +127,8 @@ class media_jwplayer_plugin extends core_media_player {
                     $poster = urldecode($playeroptions['image']->out(false));
                 } else if ($poster = get_config('media_jwplayer', 'defaultposter')) {
                     $syscontext = context_system::instance();
-                    $poster = moodle_url::make_pluginfile_url($syscontext->id, 'media_jwplayer', 'defaultposter', 0, null, $poster)->out(true);
+                    $poster = moodle_url::make_pluginfile_url(
+                        $syscontext->id, 'media_jwplayer', 'defaultposter', 0, null, $poster)->out(true);
                 }
 
                 if ($tagtype === 'a') {
@@ -159,11 +160,13 @@ class media_jwplayer_plugin extends core_media_player {
                     // Faling back to original html5 media.
                     // We replace sources in original tag, as they might have been modified by filter.
                     $sources = implode("\n", $sources);
-                    $output = core_media_player_native::replace_sources($options[core_media_manager::OPTION_ORIGINAL_TEXT], $sources);
+                    $output = core_media_player_native::replace_sources(
+                        $options[core_media_manager::OPTION_ORIGINAL_TEXT], $sources);
 
                     // And we set poster.
                     if ($poster) {
-                        $output = core_media_player_native::add_attributes($options[core_media_manager::OPTION_ORIGINAL_TEXT], ['poster' => $poster]);
+                        $output = core_media_player_native::add_attributes(
+                            $options[core_media_manager::OPTION_ORIGINAL_TEXT], ['poster' => $poster]);
                     }
                     return $output;
                 }
@@ -258,11 +261,10 @@ class media_jwplayer_plugin extends core_media_player {
                 // We have got track tag itself counted as "attribute with no value". Remove it from array.
                 unset($trackattributes['track']);
 
-                // We popluate track data according to JWPlayer requirements.
-                // https://developer.jwplayer.com/jwplayer/docs/jw8-player-configuration-reference#section-playlist-tracks
-                // HTML5 track spec: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track
+                // We popluate track data according to JW Player API requirements.
                 $validkinds = ['subtitles', 'captions', 'chapters'];
-                if ($trackattributes['src'] && (empty($trackattributes['kind']) || in_array($trackattributes['kind'], $validkinds))) {
+                if ($trackattributes['src'] && (empty($trackattributes['kind']) ||
+                        in_array($trackattributes['kind'], $validkinds))) {
                     // Track file.
                     $track = ['file' => clean_param($trackattributes['src'], PARAM_URL)];
 
@@ -271,11 +273,12 @@ class media_jwplayer_plugin extends core_media_player {
                         $track['label'] = $trackattributes['label'];
                     }
                     if (isset($trackattributes['srclang'])) {
-                        $track['label'] = isset($track['label']) ? $track['label'] . ' (' . $trackattributes['srclang'] . ')': $trackattributes['srclang'];
+                        $track['label'] = isset($track['label']) ? $track['label'] . ' (' . $trackattributes['srclang'] . ')' : $trackattributes['srclang'];
                     }
 
                     // Kind of track.
-                    if (empty($trackattributes['kind']) || $trackattributes['kind'] === 'subtitles' || $trackattributes['kind'] === 'captions') {
+                    if (empty($trackattributes['kind']) || $trackattributes['kind'] === 'subtitles' ||
+                            $trackattributes['kind'] === 'captions') {
                         $track['kind'] = 'captions';
                     } else if ($trackattributes['kind'] === 'chapters') {
                         $track['kind'] = 'chapters';
@@ -402,7 +405,7 @@ class media_jwplayer_plugin extends core_media_player {
      */
     private static function get_global_attributes(): array {
         // List of valid global attributes.
-        // https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
+        // https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes.
         return [
             'accesskey',
             'autocapitalize',
@@ -444,8 +447,6 @@ class media_jwplayer_plugin extends core_media_player {
     private function embed_jwplayer($urls, $name, $width, $height, $options) {
         global $PAGE, $CFG;
         $mediamanager = core_media_manager::instance();
-        $output = '';
-
         $sources = [];
         $isstream = null;
         $isaudio = null;
@@ -495,7 +496,8 @@ class media_jwplayer_plugin extends core_media_player {
             $playlistitem['image'] = urldecode($options['image']->out(false));
         } else if ($poster = get_config('media_jwplayer', 'defaultposter')) {
             $syscontext = context_system::instance();
-            $playlistitem['image'] = moodle_url::make_pluginfile_url($syscontext->id, 'media_jwplayer', 'defaultposter', 0, null, $poster)->out(true);
+            $playlistitem['image'] = moodle_url::make_pluginfile_url(
+                $syscontext->id, 'media_jwplayer', 'defaultposter', 0, null, $poster)->out(true);
         }
 
         // Setup subtitle tracks.
@@ -585,7 +587,7 @@ class media_jwplayer_plugin extends core_media_player {
         $playersetup->logerrors = (bool) get_config('media_jwplayer', 'logerrors');
         // Add download button if required and supported.
         $playersetup->showdownloadbtn = get_config('media_jwplayer', 'downloadbutton') && !$isstream;
- 
+
         // Set up the player.
         $playerid = 'media_jwplayer_' . html_writer::random_id('');
         $PAGE->requires->js_call_amd('media_jwplayer/jwplayer', 'setupPlayer', [$playersetup, $playerid, $PAGE->context->id]);
@@ -664,12 +666,12 @@ class media_jwplayer_plugin extends core_media_player {
         return true;
     }
 
-   /**
-    * Setup page requirements.
-    *
-    * @param moodle_page $page the page we are going to add requirements to.
-    * @return void
-    */
+    /**
+     * Setup page requirements.
+     *
+     * @param moodle_page $page the page we are going to add requirements to.
+     * @return void
+     */
     public function setup($page) {
         global $CFG;
 

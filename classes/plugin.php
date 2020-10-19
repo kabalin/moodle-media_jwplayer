@@ -583,15 +583,9 @@ class media_jwplayer_plugin extends core_media_player {
         $playersetup->setupdata = $playersetupdata;
         $playersetup->events = $this->get_enabled_events();
         $playersetup->logerrors = (bool) get_config('media_jwplayer', 'logerrors');
-
         // Add download button if required and supported.
-        if (get_config('media_jwplayer', 'downloadbutton') && !$isstream) {
-            $playersetup->downloadbtn = [
-                'img' => $CFG->wwwroot.'/media/player/jwplayer/pix/download.png',
-                'tttext' => get_string('videodownloadbtntttext', 'media_jwplayer'),
-            ];
-        }
-
+        $playersetup->showdownloadbtn = get_config('media_jwplayer', 'downloadbutton') && !$isstream;
+ 
         // Set up the player.
         $playerid = 'media_jwplayer_' . html_writer::random_id('');
         $PAGE->requires->js_call_amd('media_jwplayer/jwplayer', 'setupPlayer', [$playersetup, $playerid, $PAGE->context->id]);

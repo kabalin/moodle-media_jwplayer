@@ -21,7 +21,15 @@
  * @copyright  2017 Ruslan Kabalin, Lancaster University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jwplayer', 'jquery', 'core/ajax', 'core/log', 'module'], function(jwplayer, $, ajax, log, module) {
+define([
+    'jwplayer',
+    'jquery',
+    'core/ajax',
+    'core/log',
+    'module',
+    'core/config',
+    'core/str'
+], function(jwplayer, $, ajax, log, module, config, str) {
     var player = {
         /** @var {Number} context ID of the page. */
         context: null,
@@ -57,16 +65,13 @@ define(['jwplayer', 'jquery', 'core/ajax', 'core/log', 'module'], function(jwpla
                 jwplayer.key = module.config().licensekey;
             }
 
-            let playerinstance = jwplayer(playerId);
             // Setup player.
-            playerinstance.setup(playerSetup.setupdata);
+            let playerInstance = jwplayer(playerId);
+            playerInstance.setup(playerSetup.setupdata);
 
             // Add download button if required.
-            if (typeof(playerSetup.downloadbtn) !== 'undefined') {
-                playerinstance.addButton(playerSetup.downloadbtn.img, playerSetup.downloadbtn.tttext, function() {
-                    // Grab the file that's currently playing.
-                    window.open(playerinstance.getPlaylistItem().file + '?forcedownload=true');
-                }, "download");
+            if (playerSetup.showdownloadbtn) {
+                player.addDownloadButton(playerInstance);
             }
 
             // Track required events and log them in Moodle.
@@ -76,23 +81,38 @@ define(['jwplayer', 'jquery', 'core/ajax', 'core/log', 'module'], function(jwpla
                 }
                 player.reqEventMap[player.getEventName(eventName)] = eventName;
                 // Attach event processing callbacks.
-                playerinstance.on(player.getEventName(eventName), player.logEvent);
+                playerInstance.on(player.getEventName(eventName), player.logEvent);
             });
 
             // Track errors and log them.
             if (playerSetup.logerrors) {
-                playerinstance.on('error', player.logError);
+                playerInstance.on('error', player.logError);
             }
-            playerinstance.on('error', function(event) {
+            playerInstance.on('error', function(event) {
                 // Log error to console.
                 log.error('media_jwplayer error: ' + event.message);
             });
-            playerinstance.on('setupError', function(event) {
+            playerInstance.on('setupError', function(event) {
                 // Log setup error to console.
                 log.error('media_jwplayer setup error: ' + event.message);
             });
         },
 
+        /**
+         * Add download button.
+         *
+         * @method addDownloadButton
+         * @param  {Object} playerInstance JW Player instance.
+         */
+        addDownloadButton: function(playerInstance) {
+            str.get_string('downloadbuttontitle', 'media_jwplayer').done(function(tooltip) {
+                const iconPath = config.wwwroot + '/media/player/jwplayer/pix/download.svg';
+                playerInstance.addButton(iconPath, tooltip, function() {
+                    // Grab the file that's currently playing.
+                    window.open(playerInstance.getPlaylistItem().file + '?forcedownload=true');
+                }, "download");
+            }).fail(log.error);
+        },
         /**
          * Event mapping helper.
          *

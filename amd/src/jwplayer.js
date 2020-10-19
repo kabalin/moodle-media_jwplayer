@@ -44,24 +44,21 @@ define(['jwplayer', 'jquery', 'core/ajax', 'core/log', 'module'], function(jwpla
          *
          * @method  init
          * @param   {Object} playerSetup JW Player setup parameters.
+         * @param   {String} playerId    JW Player target element id.
          * @param   {Number} context     The context of the current page.
          */
-        init: function (playerSetup, context) {
+        init: function (playerSetup, playerId, context) {
             player.context = context;
+
+            if (!$('#' + playerId).length) {
+                throw new Error('The target element for player setup (#' + playerId + ') is missing.');
+            }
 
             if (module.config().licensekey) {
                 jwplayer.key = module.config().licensekey;
             }
 
-            if (!$('#' + playerSetup.playerid).length) {
-                player.logError({
-                    type: 'setupError',
-                    message: 'The target element for player setup (#' + playerSetup.playerid + ') is missing.'
-                });
-                return;
-            }
-
-            let playerinstance = jwplayer(playerSetup.playerid);
+            let playerinstance = jwplayer(playerId);
             // Setup player.
             playerinstance.setup(playerSetup.setupdata);
 
@@ -86,8 +83,11 @@ define(['jwplayer', 'jquery', 'core/ajax', 'core/log', 'module'], function(jwpla
             });
 
             // Track errors and log them.
-            playerinstance.on('setupError', player.logError);
             playerinstance.on('error', player.logError);
+            playerinstance.on('setupError', function(event) {
+                // For setup error just log to console.
+                log.error('media_jwplayer setup error: ' + event.message);
+            });
         },
 
         /**
@@ -108,6 +108,15 @@ define(['jwplayer', 'jquery', 'core/ajax', 'core/log', 'module'], function(jwpla
          * @param  {Object} event JW Player event.
          */
         logEvent: function(event) {
+            if (event.type === 'play' && event.playReason !== 'interaction') {
+                // Play event resulted not from user action, skipping.
+                return;
+            }
+            if (event.type === 'pause' && event.pauseReason !== 'interaction') {
+                // Pause event resulted not from user action, skipping.
+                return;
+            }
+
             let args = {
                 context:    player.context,
                 event:      player.reqEventMap[event.type],
@@ -143,12 +152,6 @@ define(['jwplayer', 'jquery', 'core/ajax', 'core/log', 'module'], function(jwpla
          * @param  {Object} event JW Player event.
          */
         logError: function(event) {
-            if (event.type === 'setupError') {
-                // For setup error just log to console.
-                log.error('media_jwplayer setup error: ' + event.message);
-                return;
-            }
-
             log.error('media_jwplayer error: ' + event.message);
 
             if (typeof player.reqEventMap.error !== 'undefined') {
@@ -184,8 +187,9 @@ define(['jwplayer', 'jquery', 'core/ajax', 'core/log', 'module'], function(jwpla
          * Setup player instance.
          *
          * @method  setupPlayer
-         * @param   {Object}    playerSetup JW Player setup parameters.
-         * @param   {Number}    context     The context of the current page.
+         * @param   {Object} playerSetup JW Player setup parameters.
+         * @param   {String} playerId    JW Player target element id.
+         * @param   {Number} context     The context of the current page.
          */
         setupPlayer: player.init
     };

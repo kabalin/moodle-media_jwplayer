@@ -75,6 +75,12 @@ if ($ADMIN->fulltree) {
         get_string('enabledeventsdesc', 'media_jwplayer'),
         ['started', 'completed'], $supportedeventsmenu));
 
+    // Error logging.
+    $settings->add(new admin_setting_configcheckbox('media_jwplayer/logerrors',
+        get_string('logerrors', 'media_jwplayer'),
+        get_string('logerrorsdesc', 'media_jwplayer'),
+        1));
+
     // Appearance related settings.
     $settings->add(new admin_setting_heading('appearanceconfig',
         get_string('appearanceconfig', 'media_jwplayer'), ''));

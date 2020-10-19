@@ -582,6 +582,7 @@ class media_jwplayer_plugin extends core_media_player {
         $playersetup = new stdClass();
         $playersetup->setupdata = $playersetupdata;
         $playersetup->events = $this->get_enabled_events();
+        $playersetup->logerrors = (bool) get_config('media_jwplayer', 'logerrors');
 
         // Add download button if required and supported.
         if (get_config('media_jwplayer', 'downloadbutton') && !$isstream) {
@@ -640,7 +641,6 @@ class media_jwplayer_plugin extends core_media_player {
             'seeked',
             'resumed',
             'completed',
-            'failed',
         ];
         return $events;
     }

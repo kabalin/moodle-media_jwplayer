@@ -74,5 +74,5 @@ $string['paideditionsconfigdescr'] = 'Settings below only work with Pro, Premium
 $string['playbackrates'] = 'Playback rate button';
 $string['playbackratesdesc'] = 'Display a button in the controlbar to adjust playback speed. Select speeds that need to be available for users. To disable control, select only \'1x\' or leave no options selected.';
 $string['pluginname'] = 'JW Player 8';
-$string['privacy:metadata'] = 'JWPlayer plugin does not store any personal data.';
+$string['privacy:metadata'] = 'JWPlayer media plugin for Moodle does not store any personal data, however JW Player technology provider (legally known as LongTail Ad Solutions, Inc.) may collect usage and tracking data. Please refer to JW Player Privacy Policy (https://www.jwplayer.com/privacy/) for more details.';
 $string['videodownloadbtntttext'] = 'Download Video';

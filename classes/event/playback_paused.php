@@ -83,7 +83,7 @@ class playback_paused extends \core\event\base {
      * @return string
      */
     public function get_description(): string {
-        $logstring = "The user with id {$this->userid} has paused playback of the video '{$this->other['title']}'";
+        $logstring = "The user with id {$this->userid} has paused playback of the media '{$this->other['title']}'";
         if (isset($this->other['position'])) {
             $logstring .= " at {$this->other['position']}s";
         }

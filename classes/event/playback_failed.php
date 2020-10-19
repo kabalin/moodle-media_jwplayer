@@ -88,7 +88,7 @@ class playback_failed extends \core\event\base {
      * @return string
      */
     public function get_description(): string {
-        $logstring = "The user with id {$this->userid} has received an error viewing the video '{$this->other['title']}'";
+        $logstring = "The user with id {$this->userid} has received an error during playback of the media '{$this->other['title']}'";
         if (isset($this->other['position'])) {
             $logstring .= " at {$this->other['position']}s";
         }

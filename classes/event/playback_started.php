@@ -80,6 +80,6 @@ class playback_started extends \core\event\base {
      * @return string
      */
     public function get_description(): string {
-        return "The user with id {$this->userid} has started playback of the video '{$this->other['title']}'";
+        return "The user with id {$this->userid} has started playback of the media '{$this->other['title']}'";
     }
 }

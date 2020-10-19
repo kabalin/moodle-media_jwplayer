@@ -90,7 +90,7 @@ class playback_seeked extends \core\event\base {
      * @return string
      */
     public function get_description(): string {
-        $logstring = "The user with id {$this->userid} has moved playback of the video '{$this->other['title']}'
+        $logstring = "The user with id {$this->userid} has moved playback position of the media '{$this->other['title']}'
             from {$this->other['position']}s to {$this->other['offset']}s";
         return $logstring;
     }

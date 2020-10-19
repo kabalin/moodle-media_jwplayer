@@ -79,7 +79,7 @@ class playback_completed extends \core\event\base {
      * @return string
      */
     public function get_description(): string {
-        $logstring = "The user with id {$this->userid} has completed viewing the video '{$this->other['title']}'";
+        $logstring = "The user with id {$this->userid} has completed playback of the media '{$this->other['title']}'";
         return $logstring;
     }
 }

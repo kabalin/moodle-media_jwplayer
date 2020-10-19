@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/kabalin/moodle-media_jwplayer.svg?branch=master)](https://travis-ci.org/kabalin/moodle-media_jwplayer)
+
 moodle-media_jwplayer
 ======================
 

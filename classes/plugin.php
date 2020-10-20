@@ -67,6 +67,8 @@ class media_jwplayer_plugin extends core_media_player {
             if ($tagtype === 'video' || $tagtype === 'audio') {
                 // This is HTML5 media tag.
                 $playeroptions = $this->get_options_from_media_tag($options[core_media_manager::OPTION_ORIGINAL_TEXT]);
+                // Using <audio> tag will result in audio player mode irrspective to source mime type.
+                $playeroptions['isaudio'] = ($tagtype === 'audio');
             } else if ($tagtype === 'a') {
                 // This is <a> tag.
                 // Create attribute options if we don't already have them.
@@ -95,7 +97,7 @@ class media_jwplayer_plugin extends core_media_player {
             $supportedextensions = file_get_typegroup('extension', ['html_video', 'html_audio']);
             $manager = core_media_manager::instance();
             $sources = [];
-            $isaudio = null;
+            $isaudio = $playeroptions['isaudio'] ?? null;
             // Check URLs if they can be used for html5. Even if we had html5 video source,
             // we go through links anyway to add mimetype.
             foreach ($urls as $url) {
@@ -449,7 +451,7 @@ class media_jwplayer_plugin extends core_media_player {
         $mediamanager = core_media_manager::instance();
         $sources = [];
         $isstream = null;
-        $isaudio = null;
+        $isaudio = $options['isaudio'] ?? null;
         foreach ($urls as $url) {
             // Add the details for this source.
             $source = ['file' => urldecode($url->out(false))];
@@ -462,7 +464,7 @@ class media_jwplayer_plugin extends core_media_player {
             if ($isstream === null) {
                 $isstream = in_array($ext, ['m3u8', 'mpd', 'ts', 'fmp4']);
             }
-            // Check if this is audio.
+            // Check if this is audio if we don't know that already from media tag.
             if ($isaudio === null) {
                 $isaudio = in_array('.' . $ext, file_get_typegroup('extension', 'html_audio'));
             }
@@ -476,6 +478,7 @@ class media_jwplayer_plugin extends core_media_player {
         // Set Title from title attribute of a tag if it has one if not default to filename.
         if (isset($options['globalattributes']['title'])) {
             $playlistitem['title'] = (string) $options['globalattributes']['title'];
+            // Remove title from global attributes.
             unset ($options['globalattributes']['title']);
         } else if (!get_config('media_jwplayer', 'emptytitle')) {
             $playlistitem['title'] = $this->get_name($name, $urls);

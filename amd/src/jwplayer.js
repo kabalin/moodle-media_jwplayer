@@ -54,7 +54,7 @@ define([
          * @param   {String} playerId    JW Player target element id.
          * @param   {Number} context     The context of the current page.
          */
-        init: function (playerSetup, playerId, context) {
+        init: function(playerSetup, playerId, context) {
             player.context = context;
 
             if (!$('#' + playerId).length) {
@@ -75,7 +75,7 @@ define([
             }
 
             // Track required events and log them in Moodle.
-            playerSetup.events.forEach(function (eventName) {
+            playerSetup.events.forEach(function(eventName) {
                 if (typeof player.getEventName(eventName) === 'undefined') {
                     throw new Error("Event tracking for '" + eventName + "' has no JWPlayer API event mapping.");
                 }

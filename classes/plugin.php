@@ -275,7 +275,8 @@ class media_jwplayer_plugin extends core_media_player {
                         $track['label'] = $trackattributes['label'];
                     }
                     if (isset($trackattributes['srclang'])) {
-                        $track['label'] = isset($track['label']) ? $track['label'] . ' (' . $trackattributes['srclang'] . ')' : $trackattributes['srclang'];
+                        $track['label'] = isset($track['label']) ?
+                            $track['label'] . ' (' . $trackattributes['srclang'] . ')' : $trackattributes['srclang'];
                     }
 
                     // Kind of track.

@@ -573,7 +573,8 @@ class media_jwplayer_plugin extends core_media_player {
             $playbackrates = array_map(function($param) {
                 return (float) $param;
             }, explode(',', $playbackrates));
-            $playersetupdata['playbackRateControls'] = $playbackrates;
+            $playersetupdata['playbackRates'] = $playbackrates;
+            $playersetupdata['playbackRateControls'] = true;
         }
 
         // Google Analytics settings.

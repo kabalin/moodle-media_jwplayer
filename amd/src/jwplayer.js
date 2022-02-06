@@ -17,7 +17,6 @@
  * JW Player module.
  *
  * @module     media_jwplayer/jwplayer
- * @package    media_jwplayer
  * @copyright  2017 Ruslan Kabalin, Lancaster University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

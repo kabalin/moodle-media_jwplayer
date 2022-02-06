@@ -24,8 +24,6 @@
 
 namespace media_jwplayer\privacy;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Privacy Subsystem for media_jwplayer implementing null_provider.
  *

@@ -26,8 +26,6 @@
 
 namespace media_jwplayer\event;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Playback started.
  *

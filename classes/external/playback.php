@@ -47,9 +47,10 @@ class playback extends external_api {
      * @param   string  $title      The title of the media.
      * @param   int     $position   The position in seconds in the file on which event occured (optional).
      * @param   int     $offset     The position in seconds in the file where seek is requested (optional).
+     * @param   int     $medialength     Full length of the media (optional).
      * @return  array               As described in playback_event_returns
      */
-    public static function playback_event($context, $event, $title, $position, $offset) {
+    public static function playback_event($context, $event, $title, $position, $offset, $medialength) {
         $context = \context_helper::instance_by_id($context);
         self::validate_context($context);
 
@@ -64,6 +65,7 @@ class playback extends external_api {
                 'title'    => $title,
                 'position' => $position,
                 'offset'   => $offset,
+                'medialength' => $medialength,
             ],
         ])->trigger();
 
@@ -82,6 +84,7 @@ class playback extends external_api {
             'title'     => new external_value(PARAM_TEXT, 'Media title'),
             'position'  => new external_value(PARAM_INT,  'Position in the file (sec)', VALUE_DEFAULT, 0),
             'offset'    => new external_value(PARAM_INT,  'Seek offset (sec)', VALUE_DEFAULT, 0),
+            'medialength' => new external_value(PARAM_INT, 'Media Length (sec)', VALUE_DEFAULT, 0),
         ]);
     }
 

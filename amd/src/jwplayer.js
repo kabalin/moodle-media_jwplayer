@@ -143,7 +143,8 @@ define([
                 context:    player.context,
                 event:      player.reqEventMap[event.type],
                 title:      this.getPlaylistItem().file,
-                position:   parseInt(this.getPosition())
+                position:   parseInt(this.getPosition()),
+                mediaLength: parseInt(this.getDuration())
             };
 
             if (typeof this.getPlaylistItem().title !== 'undefined') {

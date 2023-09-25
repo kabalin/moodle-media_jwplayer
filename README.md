@@ -1,4 +1,4 @@
-![Moodle Plugin CI](https://github.com/kabalin/moodle-media_jwplayer/workflows/Moodle%20Plugin%20CI/badge.svg)
+[![media_jwplayer CI](https://github.com/kabalin/moodle-media_jwplayer/actions/workflows/ci.yml/badge.svg)](https://github.com/kabalin/moodle-media_jwplayer/actions/workflows/ci.yml)
 
 moodle-media_jwplayer (JW Player 8)
 ==================================

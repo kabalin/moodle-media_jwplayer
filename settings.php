@@ -34,10 +34,10 @@ if ($ADMIN->fulltree) {
         get_string('libraryhosting', 'media_jwplayer'), ''));
 
     // Hosting method.
-    $hostingmethodchoice = array(
+    $hostingmethodchoice = [
         'cloud' => get_string('hostingmethodcloud', 'media_jwplayer'),
         'self' => get_string('hostingmethodself', 'media_jwplayer'),
-    );
+    ];
     $settings->add(new media_jwplayer_hostingmethod_setting('media_jwplayer/hostingmethod',
         get_string('hostingmethod', 'media_jwplayer'),
         get_string('hostingmethoddesc', 'media_jwplayer'),

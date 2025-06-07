@@ -19,12 +19,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['7.4', '8.0', '8.1']
-        moodle-branch: ['MOODLE_401_STABLE', 'MOODLE_402_STABLE', 'master']
+        include:
+          - php: '8.4'
+            moodle-branch: 'main'
+          - php: '8.4'
+            moodle-branch: 'MOODLE_500_STABLE'
+          - php: '8.3'
+            moodle-branch: 'MOODLE_405_STABLE'
+          - php: '8.3'
+            moodle-branch: 'MOODLE_404_STABLE'
+          - php: '8.2'
+            moodle-branch: 'MOODLE_403_STABLE'
+          - php: '8.2'
+            moodle-branch: 'MOODLE_402_STABLE'
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: plugin
 

@@ -24,8 +24,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2022020500;
-$plugin->requires  = 2020061500.00; // Requires Moodle 3.9.
+$plugin->version   = 2025060700;
+$plugin->requires  = 2023042400.00; // Requires Moodle 4.2.
 $plugin->component = 'media_jwplayer';
 $plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = '8-0.2 for Moodle 3.9+';
+$plugin->release   = '8-0.3 for Moodle 4.2+';
